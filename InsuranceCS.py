@@ -13,6 +13,7 @@ import scikitplot as skplt
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn import model_selection, ensemble, neighbors, linear_model
+from sklearn.ensemble import RandomForestClassifier
 
 import inflection
 
@@ -27,6 +28,36 @@ warnings.filterwarnings("ignore")
 
 # In[2]:
 
+
+## performance metrics
+
+# definition of precision_at_k for the top 20.000 clients as default
+def precision_at_k (data, k=2000):
+    
+    # reset index
+    data = data.reset_index(drop=True)
+    
+    #create ranking order
+    data['ranking'] = data.index + 1
+    
+    #calculate precision based on column named response
+    data['precision_at_k'] = data['response'].cumsum() / data['ranking']
+    
+    return data.loc[k, 'precision_at_k']
+
+# definition of recall_at_k for the top 20.000 clients as default
+def recall_at_k (data, k=2000):
+    
+    # reset index
+    data = data.reset_index(drop=True)
+    
+    #create ranking order
+    data['ranking'] = data.index + 1
+    
+    #calculate recall based on the sum of responses
+    data['recall_at_k'] = data['response'].cumsum() / data['response'].sum()
+    
+    return data.loc[k, 'recall_at_k']
 
 def jupyter_settings():
     get_ipython().run_line_magic('matplotlib', 'inline')
@@ -242,7 +273,7 @@ sns.countplot(x = 'response', data=df4);
 
 # # Data Preparation
 
-# In[18]:
+# In[34]:
 
 
 df5 = df4.copy()
@@ -250,7 +281,7 @@ df5 = df4.copy()
 
 # ## Data Spliting
 
-# In[32]:
+# In[35]:
 
 
 df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].values)
@@ -260,7 +291,7 @@ df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].
 
 # ## Rescaling
 
-# In[20]:
+# In[36]:
 
 
 mms = MinMaxScaler()
@@ -276,7 +307,7 @@ df5['vintage'] = mms.fit_transform( df5[['vintage']].values)
 
 # ### Encoding
 
-# In[21]:
+# In[37]:
 
 
 #gender - target encoder
@@ -297,7 +328,7 @@ df5['policy_sales_channel'] = df5['policy_sales_channel'].map(fe_policy_sales_ch
 
 # # Feature Selection
 
-# In[22]:
+# In[38]:
 
 
 df6 = df5.copy()
@@ -305,7 +336,7 @@ df6 = df5.copy()
 
 # ## Split dataframe into training and test
 
-# In[23]:
+# In[39]:
 
 
 X = df6.drop('response', axis=1)
@@ -318,7 +349,7 @@ df6 = pd.concat ( [x_train, y_train], axis = 1)
 
 # ## Feature Importance
 
-# In[24]:
+# In[40]:
 
 
 forest = ensemble.ExtraTreesClassifier( n_estimators = 250, random_state = 42, n_jobs = -1)
@@ -328,7 +359,7 @@ y_train_n = y_train.values
 forest.fit( x_train_n, y_train_n)
 
 
-# In[25]:
+# In[41]:
 
 
 importances = forest.feature_importances_
@@ -354,22 +385,31 @@ plt.show()
 
 # # Machine Learning Modelling
 
-# In[26]:
+# In[44]:
 
 
 cols_selected = ['vintage', 'annual_premium', 'age', 'region_code', 
                  'vehicle_damage', 'policy_sales_channel']
+
+cols_not_selected = ['previously_insured', 'vehicle_age_between_1_2_year', 'vehicle_age_between_1_2year', 'gender', 'vehicle_age_over_2_years', 'driving_license']
+
+#create df to be used for business understading
+x_validation = x_val.drop(cols_not_selected, axis=1)
+
+#create dfs for modeling
 x_train = df6[cols_selected]
 x_val = x_val[cols_selected]
 
 
 # ## KNN Classifier
 
-# In[27]:
+# ### Model Building
+
+# In[49]:
 
 
 #define model
-knn = neighbors.KNeighborsClassifier (n_neighbors = 2)
+knn = neighbors.KNeighborsClassifier (n_neighbors = 8)
 
 #train model
 knn.fit( x_train, y_train)
@@ -381,13 +421,27 @@ yhat_knn = knn.predict_proba( x_val)
 skplt.metrics.plot_cumulative_gain(y_val, yhat_knn);
 
 
-# ### Model Building
-
 # ### Model Accuracy
 
-# ## Random Forest
+# ## Extra Trees
 
 # ### Model Building
+
+# In[28]:
+
+
+#define model
+et = ensemble.ExtraTreesClassifier (n_estimators = 1000, random_state = 42, n_jobs=-1)
+
+#train model
+et.fit( x_train, y_train)
+
+#model prediction
+yhat_et = et.predict_proba( x_val)
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_et);
+
 
 # ### Model Accuracy
 
@@ -413,6 +467,68 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_lr);
 
 # ### 7.3.2 Model Accuracy
 
+# ## Random Forest Regressor
+
+# ### Model Building
+
+# In[30]:
+
+
+#Create a Gaussian Classifier
+rf=RandomForestClassifier(n_estimators=100, min_samples_leaf=25)
+
+#train model
+rf.fit( x_train, y_train)
+
+#model prediction
+yhat_rf = lr.predict_proba( x_val)
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_rf);
+
+
 # # Performance Metrics
 
-# ## 8.1 KNN
+# In[61]:
+
+
+df8 = x_validation.copy()
+df8['response'] = y_val
+df8.head()
+
+
+# ## KNN
+
+# In[71]:
+
+
+# propensity score
+df8['score'] = yhat_knn[:,1].tolist()
+
+#sort clients by PS
+df8 = df8.sort_values('score', ascending=False)
+
+
+# In[77]:
+
+
+
+
+
+# In[87]:
+
+
+#compute precision at k
+precision_at_50 = precision_at_k(df8, 50)
+print('Precision at K:{}'.format(precision_at_50))
+
+#compute recall at k
+recall_at_50 = recall_at_k(df8, 50)
+print('Recall at K:{}'.format(recall_at_50))
+
+
+# In[ ]:
+
+
+
+
