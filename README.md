@@ -38,44 +38,37 @@ A report with the following analysis is the deliverable goals:
 
 ## Solution strategy
 
-### Step 1. Importing Data
+The following strategy was used to achieve the goal:
 
-### Step 2. Data Description
+### Step 1. Data Description
 
-### Step 3. Feature Engineering
+The initial dataset has 381.109 rows and 12 columns. Follows the features description:
+![datadictionary](https://user-images.githubusercontent.com/68538809/144522779-112488d8-f1e3-43d9-b3e3-bae4784c1f6a.JPG)
 
-### Step 4. Exploratory Data Analysis (EDA)
+### Step 2. Feature Engineering
 
-### Step 5. Data Preparation
+### Step 3. Exploratory Data Analysis (EDA)
 
-### Step 6. Feature Selection
+### Step 4. Data Preparation
 
-### Step 7. Machine Learning Modelling
+### Step 5. Feature Selection
 
-### Step 8. Hyperparameter Fine Tuning
+### Step 6. Machine Learning Modelling
 
-### Step 9. Performance Evaluation and Interpretation
+### Step 7. Hyperparameter Fine Tuning
 
-
-
-# 3. ML Forecast Solution Strategy
-
+### Step 8. Performance Evaluation and Interpretation
 
 
-# 4. Top 3 Insights
+# 3. Data Insights
 
+# 4. Machine Learning Model Applied
 
-# 5. Machine Learning Model Applied
+# 5. Machine Learning Model Performance
 
-# 6. Machine Learning Model Performance
+# 6. Business Results
 
-# 7. Business Results
+# 7. Conclusions
 
-# 8. Conclusions
-
-
-# 9. Lessons Learned
-
-
-# 10. Next Steps to Improve
+# 8. Next Steps to Improve
 
