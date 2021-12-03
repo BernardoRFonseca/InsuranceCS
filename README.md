@@ -43,7 +43,16 @@ The following strategy was used to achieve the goal:
 ### Step 1. Data Description
 
 The initial dataset has 381.109 rows and 12 columns. Follows the features description:
+
 ![datadictionary](https://user-images.githubusercontent.com/68538809/144522779-112488d8-f1e3-43d9-b3e3-bae4784c1f6a.JPG)
+
+Numerical attributes statistic analysis:
+
+ ![numericalfeatures](https://user-images.githubusercontent.com/68538809/144523197-f12e4d30-6fe9-4cd1-b995-14c54d0728fa.JPG)
+
+Categorical attributed statistic analysis:
+
+![categorical features](https://user-images.githubusercontent.com/68538809/144523226-d0f0728e-1a8c-43be-b7d0-a3fdb3879800.JPG)
 
 ### Step 2. Feature Engineering
 
