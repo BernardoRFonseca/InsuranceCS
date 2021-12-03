@@ -9,11 +9,20 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import matplotlib.pyplot as plt
 import scikitplot as skplt
+import sklearn
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing    import MinMaxScaler, StandardScaler
 from sklearn import model_selection, ensemble, neighbors, linear_model
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics          import roc_auc_score
+from sklearn.ensemble         import RandomForestClassifier
+from sklearn.naive_bayes      import GaussianNB
+from xgboost                  import XGBClassifier
+from lightgbm                 import LGBMClassifier
+from catboost                 import CatBoostClassifier
+
+from sklearn.model_selection  import StratifiedKFold
 
 import inflection
 
@@ -46,7 +55,7 @@ def precision_at_k (data, k=2000):
     return data.loc[k, 'precision_at_k']
 
 # definition of recall_at_k for the top 20.000 clients as default
-def recall_at_k (data, k=2000):
+def recall_at_k (data, k=20000):
     
     # reset index
     data = data.reset_index(drop=True)
@@ -58,6 +67,25 @@ def recall_at_k (data, k=2000):
     data['recall_at_k'] = data['response'].cumsum() / data['response'].sum()
     
     return data.loc[k, 'recall_at_k']
+
+##Define models accuracy function
+def accuracy (model_name, x_val, y_val, yhat):
+    
+    data = x_val.copy()
+    data['response'] = y_val.copy()
+    data['score'] = yhat[:, 1].tolist()
+    data = data.sort_values('score', ascending=False)
+   
+    precision = precision_at_k(data)      
+    recall = recall_at_k(data)
+    f1_score = round(2*(precision * recall) / (precision + recall), 3)
+    roc = roc_auc_score(y_val, yhat[:,1])
+    
+    return pd.DataFrame({'Model Name': model_name,
+                         'ROC AUC': roc.round(4),
+                         'Precision@K Mean': np.mean(precision).round(4),
+                         'Recall@K Mean': np.mean(recall).round(4),
+                         'F1_Score' : np.mean(f1_score).round(4)}, index=[0])
 
 def jupyter_settings():
     get_ipython().run_line_magic('matplotlib', 'inline')
@@ -208,17 +236,52 @@ m.columns = ['attributes','min', 'max', 'range', 'mean', 'median', 'std', 'skew'
 m
 
 
+# **Age** of customers ranges from 20 to 85 years old, average being close to 38.
+# 
+# **Driving Licence** ≈ 100% of the clients in analysis retain a one
+# 
+# **Vehicle insurance** ≈ 55% of the clients do not hold one
+# 
+# **Annual Premium** Clients pay ≈ 30.5k on their current health insurance policy
+# 
+# **Response** 12.23% of the clients showed to be interest in purchasing a vehicle insurance.
+
 # ### Categorical Attributes
 
 # In[13]:
 
 
-cat_attributes.describe().T
+# add percentage of most common attribute
+cat_attributes_p = cat_attributes.describe().T
+cat_attributes_p['freq_p'] = cat_attributes_p['freq'] / cat_attributes_p['count']
+cat_attributes_p
 
+
+# **Gender** ≈ 54% of the customers are Male
+# 
+# **Vehicle Age** Customers age vehicle is most commonly between 1 and 2 years old
+# 
+# **Vehicle Damage** ≈ 50% of the customers got his/her vehicle damaged in the past
+
+# **TOP 3 Combos Categorical Attributes**
+
+# In[14]:
+
+
+categorical_combo = pd.DataFrame(round(cat_attributes.value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+categorical_combo['count'] = cat_attributes.value_counts().values
+display(categorical_combo)
+
+
+# **1.** Males with car age between 1-2 years old that got vehicle damaged in the past 
+# 
+# **2.** Female with car newer than 1 year old that never got vehicle damage in the past
+# 
+# **3.** Males with car newer than 1 year old that never got vehicle damage in the past
 
 # # Feature Engineering
 
-# In[14]:
+# In[15]:
 
 
 df3 = df2.copy()
@@ -226,7 +289,7 @@ df3 = df2.copy()
 
 # ## Features Creation 
 
-# In[15]:
+# In[16]:
 
 
 # vehicle age
@@ -239,7 +302,7 @@ df3['vehicle_damage'] = df3['vehicle_damage'].apply( lambda x: 1 if x == 'Yes' e
 
 # # Exploratory Data Analysis (EDA)
 
-# In[16]:
+# In[17]:
 
 
 df4 = df3.copy()
@@ -249,49 +312,209 @@ df4 = df3.copy()
 
 # ### Response Variable
 
-# In[17]:
+# In[18]:
 
 
 sns.countplot(x = 'response', data=df4);
+
+
+# ### Numerical Variables
+
+# In[19]:
+
+
+num_attributes.hist(bins=25);
+
+
+# #### Age
+# 
+# **Findings** The average age of interested clients is higher than non-interested clients. Both plots disclose well how younger clients are not as interested as older clients.
+
+# In[20]:
+
+
+plt.subplot(1, 2, 1)
+sns.boxplot( x='response', y='age', data=df4 )
+
+plt.subplot(1, 2, 2)
+sns.histplot(df4, x='age', hue='response');
+
+
+# #### Driving Licence
+# **Findings** Only clients holding a driving license are part of the dataset. 12% are potential vehicle insurance customers
+
+# In[21]:
+
+
+aux2 = pd.DataFrame(round(df4[['driving_license', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+aux2['count'] = (aux2['%'] * df4.shape[0]).astype(int)
+aux2
+
+
+# In[22]:
+
+
+aux2 = df4[['driving_license', 'response']].groupby( 'response' ).sum().reset_index()
+sns.barplot( x='response', y='driving_license', data=aux2 );
+
+
+# #### Region Code
+
+# In[23]:
+
+
+aux3 = df4[['id', 'region_code', 'response']].groupby( ['region_code', 'response'] ).count().reset_index()
+aux3 = aux3[(aux3['id'] > 1000) & (aux3['id'] < 20000)]
+sns.scatterplot( x='region_code', y='id', hue='response', data=aux3 );
+
+
+# #### Previously Insured
+# **Findings** All potential vehicle insurance customers have never held an insurance. 46% of our clients already have vehicle insurance and are not interested.
+
+# In[24]:
+
+
+aux4 = pd.DataFrame(round(df4[['previously_insured', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+aux4['count'] = (aux4['%'] * df4.shape[0]).astype(int)
+aux4
+
+
+# In[25]:
+
+
+sns.barplot(data=aux4, x='previously_insured', y='count', hue='response');
+
+
+# #### Annual Premium
+# **Findings** Annual premiums for both interested and non-interested clients are very similar.
+
+# In[26]:
+
+
+aux5 = df4[(df4['annual_premium'] <100000)]
+sns.boxplot( x='response', y='annual_premium', data=aux5 );
+
+
+# #### Policy Sales Channel
+# **Findings**
+
+# In[27]:
+
+
+aux6 = df4[['policy_sales_channel', 'response']].groupby( 'policy_sales_channel' ).sum().reset_index()
+
+plt.xticks(rotation=90)
+ax6 = sns.barplot( x='response', y='policy_sales_channel', data=aux6, order = aux6['response']);
+
+
+# In[28]:
+
+
+aux6 = df4[['policy_sales_channel', 'response']].groupby( 'policy_sales_channel' ).sum().reset_index()
+
+plt.xticks(rotation=90)
+ax6 = sns.barplot( x='response', y='policy_sales_channel', data=aux6, order = aux6['response']);
+
+
+# #### Vintage
+# **Findings**
+
+# In[29]:
+
+
+plt.subplot(1, 2, 1)
+sns.boxplot( x='response', y='vintage', data=df4 )
+
+plt.subplot(1, 2, 2)
+sns.histplot(df4, x='vintage', hue='response');
+
+
+# ### Categorical Variables
+
+# #### Gender
+
+# In[30]:
+
+
+aux7 = pd.DataFrame(round(df4[['gender', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+aux7['count'] = (aux7['%'] * df4.shape[0]).astype(int)
+aux7
+
+
+# In[31]:
+
+
+sns.barplot(data=aux7, x='gender', y='count', hue='response');
+
+
+# #### Vehicle Age
+
+# In[32]:
+
+
+aux8 = pd.DataFrame(round(df4[['vehicle_age', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+aux8['count'] = (aux8['%'] * df4.shape[0]).astype(int)
+aux8
+
+
+# In[33]:
+
+
+sns.barplot(data=aux8, x='vehicle_age', y='count', hue='response');
+
+
+# #### Vehicle Damage
+
+# In[34]:
+
+
+aux9 = pd.DataFrame(round(df4[['vehicle_damage', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
+aux9['count'] = (aux9['%'] * df4.shape[0]).astype(int)
+aux9
+
+
+# In[35]:
+
+
+sns.barplot(data=aux9, x='vehicle_damage', y='count', hue='response');
 
 
 # ## Bivariate Analysis
 
 # ## Multivariate Analysis
 
-# In[ ]:
+# ### Numerical Attributed
+# **Finding** Having the target variable in scope, the stronger correlations with feature 'Previously Insured' (-0.34), 'Policy Sales Channel' (-0.14) and 'Age' (0.11). Outside the target variable scope, between Age and Policy Sales Chanel there is strong negative correlation of -0.58), 'Previously Insured' and 'Age' of -0.25 and last between 'Previously Insured' and 'Policy Sales Channel' 0.22. 
+
+# In[36]:
 
 
-
-
-
-# In[ ]:
-
-
-
+corr_matrix= num_attributes.corr()
+# Half matrix
+mask = np.zeros_like(corr_matrix)
+mask[np.triu_indices_from(mask)] = True
+sns.heatmap(corr_matrix, mask = mask, annot = True, square = True, cmap='YlGnBu');
 
 
 # # Data Preparation
 
-# In[34]:
+# In[37]:
 
 
 df5 = df4.copy()
 
 
-# ## Data Spliting
+# ## Standardization of DataSets 
 
-# In[35]:
+# In[38]:
 
 
 df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].values)
 
 
-# ## Standardization of DataSets 
-
 # ## Rescaling
 
-# In[36]:
+# In[39]:
 
 
 mms = MinMaxScaler()
@@ -307,7 +530,7 @@ df5['vintage'] = mms.fit_transform( df5[['vintage']].values)
 
 # ### Encoding
 
-# In[37]:
+# In[40]:
 
 
 #gender - target encoder
@@ -328,7 +551,7 @@ df5['policy_sales_channel'] = df5['policy_sales_channel'].map(fe_policy_sales_ch
 
 # # Feature Selection
 
-# In[38]:
+# In[41]:
 
 
 df6 = df5.copy()
@@ -336,7 +559,7 @@ df6 = df5.copy()
 
 # ## Split dataframe into training and test
 
-# In[39]:
+# In[42]:
 
 
 X = df6.drop('response', axis=1)
@@ -349,7 +572,7 @@ df6 = pd.concat ( [x_train, y_train], axis = 1)
 
 # ## Feature Importance
 
-# In[40]:
+# In[43]:
 
 
 forest = ensemble.ExtraTreesClassifier( n_estimators = 250, random_state = 42, n_jobs = -1)
@@ -359,7 +582,7 @@ y_train_n = y_train.values
 forest.fit( x_train_n, y_train_n)
 
 
-# In[41]:
+# In[44]:
 
 
 importances = forest.feature_importances_
@@ -385,7 +608,7 @@ plt.show()
 
 # # Machine Learning Modelling
 
-# In[44]:
+# In[45]:
 
 
 cols_selected = ['vintage', 'annual_premium', 'age', 'region_code', 
@@ -401,55 +624,11 @@ x_train = df6[cols_selected]
 x_val = x_val[cols_selected]
 
 
-# ## KNN Classifier
-
-# ### Model Building
-
-# In[49]:
-
-
-#define model
-knn = neighbors.KNeighborsClassifier (n_neighbors = 8)
-
-#train model
-knn.fit( x_train, y_train)
-
-#model prediction
-yhat_knn = knn.predict_proba( x_val)
-
-# Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_knn);
-
-
-# ### Model Accuracy
-
-# ## Extra Trees
-
-# ### Model Building
-
-# In[28]:
-
-
-#define model
-et = ensemble.ExtraTreesClassifier (n_estimators = 1000, random_state = 42, n_jobs=-1)
-
-#train model
-et.fit( x_train, y_train)
-
-#model prediction
-yhat_et = et.predict_proba( x_val)
-
-# Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_et);
-
-
-# ### Model Accuracy
-
 # ## Logistic Regression
 
 # ### Model Building
 
-# In[29]:
+# In[46]:
 
 
 #define model
@@ -461,71 +640,320 @@ lr.fit( x_train, y_train)
 #model prediction
 yhat_lr = lr.predict_proba( x_val)
 
+
+# ### Model Single Performance
+
+# In[47]:
+
+
+accuracy_lr = accuracy('Linear Regression', x_val, y_val, yhat_lr)
+accuracy_lr
+
+
+# In[48]:
+
+
 # Accumulative Gain
 skplt.metrics.plot_cumulative_gain(y_val, yhat_lr);
 
 
-# ### 7.3.2 Model Accuracy
+# In[49]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_lr );
+
+
+# ## Naive Bayes
+
+# ### Model Building
+
+# In[50]:
+
+
+#define model
+naive = GaussianNB()
+
+#train model
+naive.fit( x_train, y_train)
+
+#model prediction
+yhat_naive = naive.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[51]:
+
+
+accuracy_naive = accuracy('Naive Bayes', x_val, y_val, yhat_naive)
+accuracy_naive
+
+
+# In[52]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_naive);
+
+
+# In[53]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_naive );
+
+
+# ## Extra Trees
+
+# ### Model Building
+
+# In[54]:
+
+
+#define model
+et = ensemble.ExtraTreesClassifier (random_state = 42, n_jobs=-1)
+
+#train model
+et.fit( x_train, y_train)
+
+#model prediction
+yhat_et = et.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[55]:
+
+
+accuracy_et = accuracy('Extra Trees Classifier', x_val, y_val, yhat_et)
+accuracy_et
+
+
+# In[56]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_et);
+
+
+# In[57]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_et );
+
+
+# ### Model Accuracy
 
 # ## Random Forest Regressor
 
 # ### Model Building
 
-# In[30]:
+# In[58]:
 
 
-#Create a Gaussian Classifier
+#define model
 rf=RandomForestClassifier(n_estimators=100, min_samples_leaf=25)
 
 #train model
 rf.fit( x_train, y_train)
 
 #model prediction
-yhat_rf = lr.predict_proba( x_val)
+yhat_rf = rf.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[59]:
+
+
+accuracy_rf = accuracy('Random Forest Regressor', x_val, y_val, yhat_rf)
+accuracy_rf
+
+
+# In[60]:
+
 
 # Accumulative Gain
 skplt.metrics.plot_cumulative_gain(y_val, yhat_rf);
 
 
-# # Performance Metrics
-
 # In[61]:
 
 
-df8 = x_validation.copy()
-df8['response'] = y_val
-df8.head()
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_rf );
 
 
-# ## KNN
+# ## KNN Classifier
+
+# ### Model Building
+
+# In[62]:
+
+
+#define model
+knn = neighbors.KNeighborsClassifier (n_neighbors = 8)
+
+#train model
+knn.fit( x_train, y_train)
+
+#model prediction
+yhat_knn = knn.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[63]:
+
+
+accuracy_knn = accuracy('K-Nearest Neighbours', x_val, y_val, yhat_knn)
+accuracy_knn
+
+
+# In[64]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_knn);
+
+
+# In[65]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_knn );
+
+
+# ### Cross Validation
+
+# ## XGBoost Classifier
+
+# ### Model Building
+
+# In[66]:
+
+
+#define model
+xgboost = XGBClassifier(objective='binary:logistic',
+                        eval_metric='error',
+                        n_estimators = 100,
+                        random_state = 22)
+
+#train model
+xgboost.fit( x_train, y_train)
+
+#model prediction
+yhat_xgboost = xgboost.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[67]:
+
+
+accuracy_xgboost = accuracy('XGBoost Classifier', x_val, y_val, yhat_xgboost)
+accuracy_xgboost
+
+
+# In[68]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_xgboost);
+
+
+# In[69]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_xgboost );
+
+
+# ## LightGBM Classifier
+
+# ### Model Building
+
+# In[70]:
+
+
+#define model
+lgbm = LGBMClassifier(random_state = 22)
+
+#train model
+lgbm.fit( x_train, y_train)
+
+#model prediction
+yhat_lgbm = lgbm.predict_proba( x_val)
+
+
+# ### Model Single Performance
 
 # In[71]:
 
 
-# propensity score
-df8['score'] = yhat_knn[:,1].tolist()
+accuracy_lgbm = accuracy('LightGBM Classifier', x_val, y_val, yhat_lgbm)
+accuracy_lgbm
 
-#sort clients by PS
-df8 = df8.sort_values('score', ascending=False)
+
+# In[72]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_lgbm);
+
+
+# In[73]:
+
+
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_lgbm );
+
+
+# ## CatBoost Classifier
+
+# ### Model Building
+
+# In[74]:
+
+
+#define model
+catboost = CatBoostClassifier(verbose = False, random_state = 22)
+
+#train model
+catboost.fit( x_train, y_train)
+
+#model prediction
+yhat_catboost = catboost.predict_proba( x_val)
+
+
+# ### Model Single Performance
+
+# In[75]:
+
+
+accuracy_catboost = accuracy('CatBoost Classifier', x_val, y_val, yhat_catboost)
+accuracy_catboost
+
+
+# In[76]:
+
+
+# Accumulative Gain
+skplt.metrics.plot_cumulative_gain(y_val, yhat_catboost);
 
 
 # In[77]:
 
 
+# Lift Curve
+skplt.metrics.plot_lift_curve( y_val, yhat_catboost );
 
 
+# # Hyperparameter Fine Tuning
 
-# In[87]:
-
-
-#compute precision at k
-precision_at_50 = precision_at_k(df8, 50)
-print('Precision at K:{}'.format(precision_at_50))
-
-#compute recall at k
-recall_at_50 = recall_at_k(df8, 50)
-print('Recall at K:{}'.format(recall_at_50))
-
+# # Performance Evaluation and Interpretation
 
 # In[ ]:
 
