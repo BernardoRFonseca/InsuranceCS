@@ -56,6 +56,10 @@ Categorical attributed statistic analysis:
 
 ### Step 2. Feature Engineering
 
+On feature creation, 2 columns were modified.
+'Vehicle Change' values were changed from categorical to numerical.
+'Vehicle Age' values were changes to a standardized descriptive format.
+
 ### Step 3. Exploratory Data Analysis (EDA)
 
 ### Step 4. Data Preparation
