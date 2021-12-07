@@ -50,7 +50,7 @@ Numerical attributes statistic analysis:
 
  ![numericalfeatures](https://user-images.githubusercontent.com/68538809/144523197-f12e4d30-6fe9-4cd1-b995-14c54d0728fa.JPG)
 
-Categorical attributed statistic analysis:
+Categorical attributes statistic analysis:
 
 ![categorical features](https://user-images.githubusercontent.com/68538809/144523226-d0f0728e-1a8c-43be-b7d0-a3fdb3879800.JPG)
 
