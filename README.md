@@ -44,18 +44,18 @@ The following strategy was used to achieve the goal:
 
 The initial dataset has 381.109 rows and 12 columns. Follows the features description:
 
-- **Id**: Unique ID for the customer   | 
-- **Gender**: Gender of the customer   | 
-- **Age**: Age of the customer   | 
-- **Driving License**: 0, customer does not have DL; 1, customer already has DL  | 
-- **Region Code**: Unique code for the region of the customer   | 
-- **Previously Insured**: 1, customer already has vehicle insurance; 0, customer doesn't have vehicle insurance | 
-- **Vehicle Age**: Age of the vehicle | 
-- **Vehicle Damage**: 1, customer got his/her vehicle damaged in the past; 0, customer didn't get his/her vehicle damaged in the past | 
-- **Anual Premium**: The amount customer needs to pay as premium in the year | 
-- **Policy sales channel**: Anonymized Code for the channel of outreaching to the customer ie  | 
-- **Vintage**: Number of Days, customer has been associated with the company  | 
-- **Response**: 1, customer is interested; 0, customer is not interested. |   
+- **Id**: Unique ID for the customer   
+- **Gender**: Gender of the customer 
+- **Age**: Age of the customer  
+- **Driving License**: 0, customer does not have DL; 1, customer already has DL  
+- **Region Code**: Unique code for the region of the customer 
+- **Previously Insured**: 1, customer already has vehicle insurance; 0, customer doesn't have vehicle insurance
+- **Vehicle Age**: Age of the vehicle 
+- **Vehicle Damage**: 1, customer got his/her vehicle damaged in the past; 0, customer didn't get his/her vehicle damaged in the past
+- **Anual Premium**: The amount customer needs to pay as premium in the year 
+- **Policy sales channel**: Anonymized Code for the channel of outreaching to the customer ie 
+- **Vintage**: Number of Days, customer has been associated with the company 
+- **Response**: 1, customer is interested; 0, customer is not interested.  
 
 Numerical attributes statistic analysis:
 
@@ -73,20 +73,49 @@ On feature creation, 2 columns were modified.
 
 ### Step 3. Exploratory Data Analysis (EDA)
 
+On Exploratory Data Analysis, Univariate, Bivariate and Multivariates study was performed to help understand the statistical properties of each attributes, correlations and hypothesis testing.
+
 ### Step 4. Data Preparation
+
+On this section, Standardization (StandardScaler Scaler), Rescaling (MinMax Scaler) and Encoding Transformations (Target Encoder) of the variables was carried out.
 
 ### Step 5. Feature Selection
 
+To select the features to be used, two methods were used:
+
+1. Application of Feature Importance using ExtraTreesClassifier method;
+2. EDA insights .
+
+**From Feature Importance:** 'vintage', 'annual_premium', 'age', 'region_code', 'vehicle_damage' and 'policy_sales_channel'
+**From EDA:** 'driving_license'
+
 ### Step 6. Machine Learning Modelling
+
+Machine learning models were trained and passed through Cross-Validation to evaluate the "real" performance. 
 
 ### Step 7. Hyperparameter Fine Tuning
 
+Based on Machine Learning Modelling results, the best model was chosen and submited to Hyperparameter Fine Tuning to optize its performance.
+
 ### Step 8. Performance Evaluation and Interpretation
 
+One of the main steps is the performance evaluation and interpertration, this stage intends to translate the model performance into business value. In this case, a correct classification of customers intention will bring a higher volume of sales inside a limited investment budget.
 
 # 3. Data Insights
 
 # 4. Machine Learning Model Applied
+
+The following Machine Learning model were tested and cross-validated:
+
+- **Logistic Regression**
+- **Naive Bayes**
+- **Extra Trees**
+- **Random Forest Regressor**
+- **K-Nearest Neighbors Regressor (KNN)**
+- **XGBoost Classifier**
+- **LightGBM Classifier**
+- **CatBoost Classifier**
+
 
 # 5. Machine Learning Model Performance
 

@@ -3,31 +3,33 @@
 
 # # Imports
 
-# In[1]:
+# In[314]:
 
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-import scikitplot as skplt
+import pandas                 as pd
+import numpy                  as np
+import seaborn                as sns
+import matplotlib.pyplot      as plt
+import scikitplot             as skplt
 import sklearn
+import inflection
 
 from sklearn.preprocessing    import MinMaxScaler, StandardScaler
-from sklearn import model_selection, ensemble, neighbors, linear_model
+from sklearn                  import model_selection
+from sklearn.model_selection  import StratifiedKFold
+from sklearn                  import ensemble
+from sklearn                  import neighbors
+from sklearn                  import linear_model
 from sklearn.metrics          import roc_auc_score
 from sklearn.ensemble         import RandomForestClassifier
 from sklearn.naive_bayes      import GaussianNB
 from xgboost                  import XGBClassifier
 from lightgbm                 import LGBMClassifier
 from catboost                 import CatBoostClassifier
+from kds.metrics              import plot_cumulative_gain, plot_lift
 
-from sklearn.model_selection  import StratifiedKFold
-
-import inflection
-
-from IPython.display            import Image
-from IPython.core.display       import HTML
+from IPython.display          import Image
+from IPython.core.display     import HTML
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -35,10 +37,10 @@ warnings.filterwarnings("ignore")
 
 # ## Helper Functions
 
-# In[2]:
+# ### Models Performance
 
+# In[179]:
 
-## performance metrics
 
 # definition of precision_at_k for the top 20.000 clients as default
 def precision_at_k (data, k=2000):
@@ -69,7 +71,7 @@ def recall_at_k (data, k=20000):
     return data.loc[k, 'recall_at_k']
 
 ##Define models accuracy function
-def accuracy (model_name, x_val, y_val, yhat):
+def accuracy (model, x_val, y_val, yhat):
     
     data = x_val.copy()
     data['response'] = y_val.copy()
@@ -81,11 +83,71 @@ def accuracy (model_name, x_val, y_val, yhat):
     f1_score = round(2*(precision * recall) / (precision + recall), 3)
     roc = roc_auc_score(y_val, yhat[:,1])
     
-    return pd.DataFrame({'Model Name': model_name,
+    return pd.DataFrame({'Model Name': type(model).__name__,
                          'ROC AUC': roc.round(4),
                          'Precision@K Mean': np.mean(precision).round(4),
                          'Recall@K Mean': np.mean(recall).round(4),
                          'F1_Score' : np.mean(f1_score).round(4)}, index=[0])
+
+## Define Cross-Validation
+def cross_validation(model, x_train, y_train, k, data, Verbose = True):
+    
+    kfold = StratifiedKFold(n_splits=k, shuffle=True, random_state=28)
+    precision_list = []
+    recall_list = []
+    f1_score_list = []
+    roc_list = []
+    i=1
+
+    for train_cv, val_cv in kfold.split(x_train, y_train):
+        
+        if Verbose == True:
+            
+            print(f'Fold Number {i}/{k}')
+            
+        else:
+            pass
+        
+        x_train_fold = x_train.iloc[train_cv]
+        y_train_fold = y_train.iloc[train_cv]
+        x_val_fold = x_train.iloc[val_cv]
+        y_val_fold = y_train.iloc[val_cv]
+
+        model_fit = model.fit(x_train_fold, y_train_fold.values.ravel())
+        yhat = model.predict_proba(x_val_fold)        
+        
+        data = x_val_fold.copy()
+        data['response'] = y_val_fold.copy()
+        data['score'] = yhat[:, 1].tolist()
+        data = data.sort_values('score', ascending=False)
+
+        precision = precision_at_k(data) 
+        precision_list.append(precision)
+        
+        recall = recall_at_k(data)
+        recall_list.append(recall)
+        
+        f1_score = round(2*(precision * recall) / (precision + recall), 3)
+        f1_score_list.append(f1_score)
+       
+        roc = roc_auc_score(y_val_fold, yhat[:, 1])
+        roc_list.append(roc)
+            
+        
+        i+=1
+        
+    df = pd.DataFrame({'Model Name': type(model).__name__,
+                         'ROC AUC': roc.round(4),
+                         'Precision@K Mean': np.mean(precision).round(4),
+                         'Recall@K Mean': np.mean(recall).round(4),
+                         'F1_Score' : np.mean(f1_score).round(4)}, index=[0])
+    return df
+
+
+# ### Graphic
+
+# In[ ]:
+
 
 def jupyter_settings():
     get_ipython().run_line_magic('matplotlib', 'inline')
@@ -611,10 +673,11 @@ plt.show()
 # In[45]:
 
 
+#I will use as well 'driving_license' as it seemes an importante feature in EDA
 cols_selected = ['vintage', 'annual_premium', 'age', 'region_code', 
-                 'vehicle_damage', 'policy_sales_channel']
+                 'vehicle_damage', 'policy_sales_channel', 'driving_license']
 
-cols_not_selected = ['previously_insured', 'vehicle_age_between_1_2_year', 'vehicle_age_between_1_2year', 'gender', 'vehicle_age_over_2_years', 'driving_license']
+cols_not_selected = ['previously_insured', 'vehicle_age_between_1_2_year', 'vehicle_age_between_1_2year', 'gender', 'vehicle_age_over_2_years']
 
 #create df to be used for business understading
 x_validation = x_val.drop(cols_not_selected, axis=1)
@@ -628,7 +691,7 @@ x_val = x_val[cols_selected]
 
 # ### Model Building
 
-# In[46]:
+# In[180]:
 
 
 #define model
@@ -643,12 +706,23 @@ yhat_lr = lr.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[47]:
+# In[181]:
 
 
-accuracy_lr = accuracy('Linear Regression', x_val, y_val, yhat_lr)
+accuracy_lr = accuracy(lr, x_val, y_val, yhat_lr)
 accuracy_lr
 
+
+# ### Cross Validation Performance
+
+# In[182]:
+
+
+accuracy_cv_lr = cross_validation(lr, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_lr
+
+
+# ### Performance Plotted
 
 # In[48]:
 
@@ -668,7 +742,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_lr );
 
 # ### Model Building
 
-# In[50]:
+# In[183]:
 
 
 #define model
@@ -683,12 +757,23 @@ yhat_naive = naive.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[51]:
+# In[184]:
 
 
-accuracy_naive = accuracy('Naive Bayes', x_val, y_val, yhat_naive)
+accuracy_naive = accuracy(naive, x_val, y_val, yhat_naive)
 accuracy_naive
 
+
+# ### Cross Validation Performance
+
+# In[174]:
+
+
+accuracy_cv_naive = cross_validation(naive, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_naive
+
+
+# ### Performance Plotted
 
 # In[52]:
 
@@ -708,7 +793,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_naive );
 
 # ### Model Building
 
-# In[54]:
+# In[185]:
 
 
 #define model
@@ -723,12 +808,23 @@ yhat_et = et.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[55]:
+# In[186]:
 
 
-accuracy_et = accuracy('Extra Trees Classifier', x_val, y_val, yhat_et)
+accuracy_et = accuracy(et, x_val, y_val, yhat_et)
 accuracy_et
 
+
+# ### Cross Validation Performance
+
+# In[187]:
+
+
+accuracy_cv_et = cross_validation(et, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_et
+
+
+# ### Performance Plotted
 
 # In[56]:
 
@@ -744,13 +840,11 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_et);
 skplt.metrics.plot_lift_curve( y_val, yhat_et );
 
 
-# ### Model Accuracy
-
 # ## Random Forest Regressor
 
 # ### Model Building
 
-# In[58]:
+# In[188]:
 
 
 #define model
@@ -765,12 +859,23 @@ yhat_rf = rf.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[59]:
+# In[189]:
 
 
-accuracy_rf = accuracy('Random Forest Regressor', x_val, y_val, yhat_rf)
+accuracy_rf = accuracy(rf, x_val, y_val, yhat_rf)
 accuracy_rf
 
+
+# ### Cross Validation Performance
+
+# In[190]:
+
+
+accuracy_cv_rf = cross_validation(rf, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_rf
+
+
+# ### Performance Plotted
 
 # In[60]:
 
@@ -790,7 +895,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_rf );
 
 # ### Model Building
 
-# In[62]:
+# In[191]:
 
 
 #define model
@@ -805,12 +910,23 @@ yhat_knn = knn.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[63]:
+# In[192]:
 
 
-accuracy_knn = accuracy('K-Nearest Neighbours', x_val, y_val, yhat_knn)
+accuracy_knn = accuracy(knn, x_val, y_val, yhat_knn)
 accuracy_knn
 
+
+# ### Cross Validation Performance
+
+# In[193]:
+
+
+accuracy_cv_knn = cross_validation(knn, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_knn
+
+
+# ### Performance Plotted
 
 # In[64]:
 
@@ -832,7 +948,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_knn );
 
 # ### Model Building
 
-# In[66]:
+# In[194]:
 
 
 #define model
@@ -850,12 +966,23 @@ yhat_xgboost = xgboost.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[67]:
+# In[195]:
 
 
-accuracy_xgboost = accuracy('XGBoost Classifier', x_val, y_val, yhat_xgboost)
+accuracy_xgboost = accuracy(xgboost, x_val, y_val, yhat_xgboost)
 accuracy_xgboost
 
+
+# ### Cross Validation Performance
+
+# In[196]:
+
+
+accuracy_cv_xgboost = cross_validation(xgboost, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_xgboost
+
+
+# ### Performance Plotted
 
 # In[68]:
 
@@ -875,7 +1002,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_xgboost );
 
 # ### Model Building
 
-# In[70]:
+# In[201]:
 
 
 #define model
@@ -890,12 +1017,23 @@ yhat_lgbm = lgbm.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[71]:
+# In[202]:
 
 
-accuracy_lgbm = accuracy('LightGBM Classifier', x_val, y_val, yhat_lgbm)
+accuracy_lgbm = accuracy(lgbm, x_val, y_val, yhat_lgbm)
 accuracy_lgbm
 
+
+# ### Cross Validation Performance
+
+# In[203]:
+
+
+accuracy_cv_lgbm = cross_validation(lgbm, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_lgbm
+
+
+# ### Performance Plotted
 
 # In[72]:
 
@@ -915,7 +1053,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_lgbm );
 
 # ### Model Building
 
-# In[74]:
+# In[197]:
 
 
 #define model
@@ -930,12 +1068,23 @@ yhat_catboost = catboost.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[75]:
+# In[198]:
 
 
-accuracy_catboost = accuracy('CatBoost Classifier', x_val, y_val, yhat_catboost)
+accuracy_catboost = accuracy(catboost, x_val, y_val, yhat_catboost)
 accuracy_catboost
 
+
+# ### Cross Validation Performance
+
+# In[199]:
+
+
+accuracy_cv_catboost = cross_validation(catboost, x_train, y_train, 5, df6, Verbose = True)
+accuracy_cv_catboost
+
+
+# ### Performance Plotted
 
 # In[76]:
 
@@ -951,12 +1100,201 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_catboost);
 skplt.metrics.plot_lift_curve( y_val, yhat_catboost );
 
 
+# ## Comparing Models Preformance
+
+# ### Single Performance
+
+# In[205]:
+
+
+models_results = pd.concat([accuracy_lr, accuracy_naive, accuracy_et, accuracy_rf, accuracy_knn, accuracy_xgboost, accuracy_lgbm, accuracy_catboost])
+models_results.sort_values('Recall@K Mean', ascending = False)
+
+
+# ### Cross Validation Performance
+
+# In[206]:
+
+
+models_results_cv = pd.concat([accuracy_cv_lr, accuracy_cv_naive, accuracy_cv_et, accuracy_cv_rf, accuracy_cv_knn, accuracy_cv_xgboost, accuracy_cv_lgbm, accuracy_cv_catboost])
+models_results_cv.sort_values('Recall@K Mean', ascending = False)
+
+
 # # Hyperparameter Fine Tuning
+
+# ## Random Search
+
+# In[237]:
+
+
+import random
+
+param = {'depth' : [1, 2, 5, 10, 16],
+         'iterations': [50, 100],
+         'learning_rate' : [0.001, 0.01, 0.1, 0.2, 0.3],
+         'l2_leaf_reg' : [1, 2, 5, 10, 100],
+         'border_count' : [5, 25, 50, 100, 200],
+         'random_state' : [22]
+        }
+
+MAX_EVAL = 10
+
+
+# In[238]:
+
+
+final_result = pd.DataFrame({'ROC AUC': [], 'Precision@K Mean': [], 'Recall@K Mean': [], 'F1_Score': [] })
+
+for i in range ( MAX_EVAL ):
+    
+    ## choose randomly values for parameters
+    hp = { k: random.sample(v, 1)[0] for k, v in param.items() }
+    print( 'Step ' +str(i +1) + '/' + str(MAX_EVAL))
+    print( hp )
+    # model
+    model_catboost = CatBoostClassifier(depth=hp['depth'],
+                          iterations = hp['iterations'],
+                          learning_rate=hp['learning_rate'],
+                          l2_leaf_reg=hp['l2_leaf_reg'],
+                          border_count =hp['border_count'],
+                          random_state=hp['random_state'])
+
+
+    # performance
+    model_catboost_result = cross_validation(model_catboost, x_train, y_train, 5, df6, Verbose = True)
+    final_result = pd.concat([final_result, model_catboost_result])
+    
+final_result.sort_values('Recall@K Mean', ascending = False)
+
+
+# ## Final Model
+# **The best parameters are the standard used by the Classifier**
+
+# In[247]:
+
+
+#define model
+catboost_tuned = CatBoostClassifier(verbose = False, random_state = 22)
+
+#train model
+catboost_tuned = catboost_tuned.fit( x_train, y_train)
+
+#model prediction
+yhat_catboost_tuned = catboost_tuned.predict_proba( x_val)
+
+
+# In[248]:
+
+
+accuracy_catboost_tuned = cross_validation(catboost_tuned, x_train, y_train, 5, df6, Verbose = False)
+accuracy_catboost_tuned
+
 
 # # Performance Evaluation and Interpretation
 
-# In[ ]:
+# ## Key findings on interested customers most relevant attributes
+
+# ### Insight #1:
+
+# ### Insight #2:
+
+# ### Insight #3:
+
+# ## What percentage of interested customers the sales team will be able to contact making 20.000 calls?
+
+# In[284]:
+
+
+# Define dataset to apply final model
+df9 = x_val.copy()
+df9['response'] = y_val.copy()
+df9['score'] = yhat_catboost_tuned[:, 1].tolist()
+df9 = df9.sort_values('score', ascending=False)
+
+# Define dataset percentage that defines 20.000 calls
+percent = round((20000/len(df9)*100), 2)
+# Apply Recall metric to define the percentage of interested customers was achieved by phone calling 20.000 people
+recall_at_20000 = round((recall_at_k(df9))*100 , 2 )
+
+print(f'Using {percent}% of the test data, the model could find {recall_at_20000}% of the total customers interested in purchase a car insurance.')
+
+
+# In[293]:
+
+
+fig, ax = plt.subplots(figsize = (25, 10))
+
+plt.subplot(1, 2, 1)
+plot_cumulative_gain(y_val, yhat_catboost_tuned[:,1])
+plt.axvline(2.624, color ='#FF7F0E', ls = '--')
+plt.title('Cumulative Gain Final Model - 20.000 calls')
+plt.yticks(np.arange(0, 100, step = 10))
+plt.xticks(np.arange(0, 10.5, step = 0.5))
+plt.legend(['Final Model - Catboost Classifier', 'Wizard', 'Random', 'Test Percentage'])
+
+bbox = dict(boxstyle ='round', fc ='0.7')
+arrowprops = dict(facecolor ='#4D4D4D')
+plt.annotate('Final Model: 69.37%', xy = (2.624, 69.37),
+                xytext =(3, 67), 
+                arrowprops = arrowprops, bbox = bbox)
+
+plt.annotate('Random: ~26%', xy = (2.624, 26.24),
+                xytext =(2.8, 29), 
+                arrowprops = arrowprops, bbox = bbox);
 
 
 
+plt.subplot(1, 2, 2)
+plot_lift(y_val, yhat_catboost_tuned[:,1])
+plt.axvline(2.624, color ='#FF7F0E', ls = '--')
+plt.title('Lift Curve - 20.000 calls')
+plt.yticks(np.arange(0, 3, step = 0.2))
+plt.xticks(np.arange(0, 10.5, step = 0.5))
+plt.legend(['Final Model - Catboost Classifier', 'Random', 'Test Percentage']);
+
+
+# ## By increasing the capacity to 40,000 calls, what percentage of interested customers the sales team will be able to contact?
+
+# In[295]:
+
+
+# Define dataset percentage that defines 40.000 calls
+percent = round((40000/len(df9)*100), 2)
+# Apply Recall metric to define the percentage of interested customers was achieved by phone calling 20.000 people
+recall_at_40000 = round((recall_at_k(df9, 40000))*100 , 2 )
+
+print(f'Using {percent}% of the test data, the model could find {recall_at_40000}% of the total customers interested in purchase a car insurance.')
+
+
+# In[312]:
+
+
+fig, ax = plt.subplots(figsize = (25, 10))
+
+plt.subplot(1, 2, 1)
+plot_cumulative_gain(y_val, yhat_catboost_tuned[:,1])
+plt.axvline(5.248, color ='#FF7F0E', ls = '--')
+plt.title('Cumulative Gain Final Model - 40.000 calls')
+plt.yticks(np.arange(0, 100, step = 10))
+plt.xticks(np.arange(0, 10.5, step = 0.5))
+plt.legend(['Final Model - Catboost Classifier', 'Wizard', 'Random', 'Test Percentage'])
+
+arrowprops = dict(facecolor ='#4D4D4D')
+plt.annotate('Final Model: 98.67%', xy = (5.248, 98.67),
+                xytext =(5.7, 94), 
+                arrowprops = arrowprops, bbox = bbox)
+
+plt.annotate('Random: ~52%', xy = (5.248, 52.48),
+                xytext =(5.7, 49), 
+                arrowprops = arrowprops, bbox = bbox);
+
+
+
+plt.subplot(1, 2, 2)
+plot_lift(y_val, yhat_catboost_tuned[:,1])
+plt.axvline(5.248, color ='#FF7F0E', ls = '--')
+plt.title('Lift Curve - 40.000 calls')
+plt.yticks(np.arange(0, 3, step = 0.2))
+plt.xticks(np.arange(0, 10.5, step = 0.5))
+plt.legend(['Final Model - Catboost Classifier', 'Random', 'Test Percentage']);
 
