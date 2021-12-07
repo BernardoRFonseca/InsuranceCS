@@ -44,18 +44,18 @@ The following strategy was used to achieve the goal:
 
 The initial dataset has 381.109 rows and 12 columns. Follows the features description:
 
-**Id**: Unique ID for the customer   | 
-**Gender**: Gender of the customer   | 
-**Age**: Age of the customer   | 
-**Driving License**: 0, customer does not have DL; 1, customer already has DL  | 
-**Region Code**: Unique code for the region of the customer   | 
-**Previously Insured**: 1, customer already has vehicle insurance; 0, customer doesn't have vehicle insurance | 
-**Vehicle Age**: Age of the vehicle | 
-**Vehicle Damage**: 1, customer got his/her vehicle damaged in the past; 0, customer didn't get his/her vehicle damaged in the past | 
-**Anual Premium**: The amount customer needs to pay as premium in the year | 
-**Policy sales channel**: Anonymized Code for the channel of outreaching to the customer ie  | 
-**Vintage**: Number of Days, customer has been associated with the company  | 
-**Response**: 1, customer is interested; 0, customer is not interested. |   
+- **Id**: Unique ID for the customer   | 
+- **Gender**: Gender of the customer   | 
+- **Age**: Age of the customer   | 
+- **Driving License**: 0, customer does not have DL; 1, customer already has DL  | 
+- **Region Code**: Unique code for the region of the customer   | 
+- **Previously Insured**: 1, customer already has vehicle insurance; 0, customer doesn't have vehicle insurance | 
+- **Vehicle Age**: Age of the vehicle | 
+- **Vehicle Damage**: 1, customer got his/her vehicle damaged in the past; 0, customer didn't get his/her vehicle damaged in the past | 
+- **Anual Premium**: The amount customer needs to pay as premium in the year | 
+- **Policy sales channel**: Anonymized Code for the channel of outreaching to the customer ie  | 
+- **Vintage**: Number of Days, customer has been associated with the company  | 
+- **Response**: 1, customer is interested; 0, customer is not interested. |   
 
 Numerical attributes statistic analysis:
 
