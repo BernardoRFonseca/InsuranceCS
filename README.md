@@ -136,7 +136,7 @@ Performance plots show the ability of the modelling identifying **all customers 
 
 # 6. Business Results
 
-1. Key findings on interested customers most relevant atributes.
+**1.** Key findings on interested customers most relevant atributes.
 
 **2.** How many interest costumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested costumers.
 
@@ -144,7 +144,7 @@ With 20,000 calls, the sales team will be able to **reach 69.37%** of the intere
 
 ![Plot20000](https://user-images.githubusercontent.com/68538809/145128483-3fd5f62e-3760-466e-a11f-fa82c3a7bff5.JPG)
 
-3. How many interest costumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested costumers.
+**3.** How many interest costumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested costumers.
 
 With 40,000 calls, the sales team will be able to **reach 98.67%** of the interested customers.
 
