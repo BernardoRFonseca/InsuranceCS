@@ -31,9 +31,6 @@ A report with the following analysis is the deliverable goals:
 
 3. How many interest costumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested costumers.
 
-4. How many calls would the team need to make to achieve 85% of the customers interested in purchasing the motor insurance.
-
-
 # 2. The Solution
 
 ## Solution strategy
@@ -133,10 +130,26 @@ The following table discloses the cross-validated ("real") performance of all th
 
 ![CVResults](https://user-images.githubusercontent.com/68538809/145123116-573d3ddb-aab6-4af7-b80f-cae3496bf2b4.jpg)
 
-Performance plots show the ability of the modelling identifying **all customers interested** in purchasing the product using approximati
+Performance plots show the ability of the modelling identifying **all customers interested** in purchasing the product using approximatily **50% of the sample** (Cumulative Gain Curve). It is also possible to see that the model is initially **more than 3 times better than a random selection** (Lift Curve). It is important to notice that even after reaching half the sample, the model remains to perform 2 times better than a random method. 
 
 ![PerformancePlots](https://user-images.githubusercontent.com/68538809/145126433-eb04613f-9910-4e97-8754-73638b5a55cd.png)
+
 # 6. Business Results
+
+1. Key findings on interested customers most relevant atributes.
+
+**2.** How many interest costumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested costumers.
+
+With 20,000 calls, the sales team will be able to **reach 69.37%** of the interested customers. 
+
+![Plot20000](https://user-images.githubusercontent.com/68538809/145128483-3fd5f62e-3760-466e-a11f-fa82c3a7bff5.JPG)
+
+3. How many interest costumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested costumers.
+
+With 40,000 calls, the sales team will be able to **reach 98.67%** of the interested customers.
+
+![Plot40000](https://user-images.githubusercontent.com/68538809/145128487-6080c55e-4aa8-4662-855b-17485d0cf037.JPG)
+
 
 # 7. Conclusions
 
