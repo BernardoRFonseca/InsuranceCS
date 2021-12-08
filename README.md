@@ -135,11 +135,7 @@ The following table discloses the cross-validated ("real") performance of all th
 
 Performance plots show the ability of the modelling identifying **all customers interested** in purchasing the product using approximati
 
-|  Cumulative Gains Curve |  Lift Curve |
-|--|--|
-| ![CumulativeGain](https://user-images.githubusercontent.com/68538809/145124323-2c10e824-12f1-451a-9319-0c602c93ad2c.JPG) | ![Lift Curve](https://user-images.githubusercontent.com/68538809/145125118-c1456aa9-1dc5-4678-891a-ab16aa82464c.png) |
-
-
+![PerformancePlots](https://user-images.githubusercontent.com/68538809/145126433-eb04613f-9910-4e97-8754-73638b5a55cd.png)
 # 6. Business Results
 
 # 7. Conclusions
