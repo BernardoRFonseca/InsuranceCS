@@ -87,6 +87,7 @@ To select the features to be used, two methods were used:
 2. EDA insights .
 
 **From Feature Importance:** 'vintage', 'annual_premium', 'age', 'region_code', 'vehicle_damage' and 'policy_sales_channel'
+
 **From EDA:** 'driving_license'
 
 ### Step 6. Machine Learning Modelling
@@ -116,8 +117,28 @@ The following Machine Learning model were tested and cross-validated:
 - **LightGBM Classifier**
 - **CatBoost Classifier**
 
-
 # 5. Machine Learning Model Performance
+
+To evaluate the performance of the models, 4 metrics were used:
+
+**ROC AUC**
+**Precision at k**
+**Recall at k**
+**F1_Score**
+
+The indicator "Recall at K" was the one to assume the major importance as it represents the proportion of relevante items found within the total number of defined item.
+
+The following table discloses the cross-validated ("real") performance of all the models used.
+**Catboost Classifier"** the best Recall at k result, making it the one be used.
+
+![CVResults](https://user-images.githubusercontent.com/68538809/145123116-573d3ddb-aab6-4af7-b80f-cae3496bf2b4.jpg)
+
+Performance plots show the ability of the modelling identifying **all customers interested** in purchasing the product using approximati
+
+|  Cumulative Gains Curve |  Lift Curve |
+|--|--|
+| ![CumulativeGain](https://user-images.githubusercontent.com/68538809/145124323-2c10e824-12f1-451a-9319-0c602c93ad2c.JPG) | ![Lift Curve](https://user-images.githubusercontent.com/68538809/145125118-c1456aa9-1dc5-4678-891a-ab16aa82464c.png) |
+
 
 # 6. Business Results
 
