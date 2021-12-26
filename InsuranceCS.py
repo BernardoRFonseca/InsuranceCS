@@ -733,7 +733,7 @@ aux27['percentage'] = aux27[1]/(aux27[1]+aux27[0])
 aux27
 
 
-# ### 2.4.8 Interest is greater on higher annual premiums (over 30k/year)
+# ### 4.2.8 Interest is greater on higher annual premiums (over 30k/year)
 # **False,** Hypothesis
 
 # In[149]:
@@ -754,9 +754,9 @@ print('% Interested in vehicle insurance for customers with health insurance pre
 print('% Interested in vehicle insurance for customers with health insurance premium over 30k/year: {0:.2f}'.format(100*(aux251[aux251['response']==1]['response'].count()/(aux251[aux251['response']==1]['response'].count()+aux251[aux251['response']==0]['response'].count()))))
 
 
-# ## Multivariate Analysis
+# ## 4.3 Multivariate Analysis
 
-# ### Numerical Attributed
+# ### 4.3.1 Numerical Attributed
 # **Finding** Having the target variable in scope, the stronger correlations with feature 'Previously Insured' (-0.34), 'Policy Sales Channel' (-0.14) and 'Age' (0.11). Outside the target variable scope, between Age and Policy Sales Chanel there is strong negative correlation of -0.58), 'Previously Insured' and 'Age' of -0.25 and last between 'Previously Insured' and 'Policy Sales Channel' 0.22. 
 
 # In[152]:
@@ -769,7 +769,7 @@ mask[np.triu_indices_from(mask)] = True
 sns.heatmap(corr_matrix, mask = mask, annot = True, square = True, cmap='YlGnBu');
 
 
-# # Data Preparation
+# # 5 Data Preparation
 
 # In[153]:
 
@@ -777,7 +777,7 @@ sns.heatmap(corr_matrix, mask = mask, annot = True, square = True, cmap='YlGnBu'
 df5 = df4.copy()
 
 
-# ## Standardization of DataSets 
+# ## 5.1 Standardization of DataSets 
 
 # In[154]:
 
@@ -785,7 +785,7 @@ df5 = df4.copy()
 df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].values)
 
 
-# ## Rescaling
+# ## 5.2 Rescaling
 
 # In[155]:
 
@@ -799,9 +799,9 @@ df5['age'] = mms.fit_transform( df5[['age']].values)
 df5['vintage'] = mms.fit_transform( df5[['vintage']].values)
 
 
-# ## Transformation
+# ## 5.3 Transformation
 
-# ### Encoding
+# ### 5.3.1 Encoding
 
 # In[156]:
 
@@ -822,7 +822,7 @@ fe_policy_sales_channel = df5.groupby('policy_sales_channel').size()/len( df5)
 df5['policy_sales_channel'] = df5['policy_sales_channel'].map(fe_policy_sales_channel)
 
 
-# # Feature Selection
+# # 6 Feature Selection
 
 # In[157]:
 
@@ -830,7 +830,7 @@ df5['policy_sales_channel'] = df5['policy_sales_channel'].map(fe_policy_sales_ch
 df6 = df5.copy()
 
 
-# ## Split dataframe into training and test
+# ## 6.1 Split dataframe into training and test
 
 # In[158]:
 
@@ -843,7 +843,7 @@ x_train, x_val, y_train, y_val = model_selection.train_test_split(X, y, test_siz
 df6 = pd.concat ( [x_train, y_train], axis = 1)
 
 
-# ## Feature Importance
+# ## 6.2 Feature Importance
 
 # In[159]:
 
@@ -879,7 +879,7 @@ plt.xlim([-1, x_train_n.shape[1]])
 plt.show()
 
 
-# # Machine Learning Modelling
+# # 7 Machine Learning Modelling
 
 # In[162]:
 
@@ -898,9 +898,9 @@ x_train = df6[cols_selected]
 x_val = x_val[cols_selected]
 
 
-# ## Logistic Regression
+# ## 7.1 Logistic Regression
 
-# ### Model Building
+# ### 7.1.1 Model Building
 
 # In[163]:
 
@@ -915,7 +915,7 @@ lr.fit( x_train, y_train)
 yhat_lr = lr.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.1.2 Model Single Performance
 
 # In[164]:
 
@@ -924,7 +924,7 @@ accuracy_lr = accuracy(lr, x_val, y_val, yhat_lr)
 accuracy_lr
 
 
-# ### Cross Validation Performance
+# ### 7.1.3 Cross Validation Performance
 
 # In[165]:
 
@@ -933,7 +933,7 @@ accuracy_cv_lr = cross_validation(lr, x_train, y_train, 5, df6, Verbose = True)
 accuracy_cv_lr
 
 
-# ### Performance Plotted
+# ### 7.1.4 Performance Plotted
 
 # In[166]:
 
@@ -949,9 +949,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_lr, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_lr, figsize = (10, 5) );
 
 
-# ## Naive Bayes
+# ## 7.2 Naive Bayes
 
-# ### Model Building
+# ### 7.2.1 Model Building
 
 # In[168]:
 
@@ -966,7 +966,7 @@ naive.fit( x_train, y_train)
 yhat_naive = naive.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.2.2 Model Single Performance
 
 # In[169]:
 
@@ -975,7 +975,7 @@ accuracy_naive = accuracy(naive, x_val, y_val, yhat_naive)
 accuracy_naive
 
 
-# ### Cross Validation Performance
+# ### 7.2.3 Cross Validation Performance
 
 # In[170]:
 
@@ -984,7 +984,7 @@ accuracy_cv_naive = cross_validation(naive, x_train, y_train, 5, df6, Verbose = 
 accuracy_cv_naive
 
 
-# ### Performance Plotted
+# ### 7.2.4 Performance Plotted
 
 # In[171]:
 
@@ -1000,9 +1000,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_naive, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_naive, figsize = (10, 5) );
 
 
-# ## Extra Trees
+# ## 7.3 Extra Trees
 
-# ### Model Building
+# ### 7.3.1 Model Building
 
 # In[173]:
 
@@ -1017,7 +1017,7 @@ et.fit( x_train, y_train)
 yhat_et = et.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.3.2 Model Single Performance
 
 # In[174]:
 
@@ -1026,7 +1026,7 @@ accuracy_et = accuracy(et, x_val, y_val, yhat_et)
 accuracy_et
 
 
-# ### Cross Validation Performance
+# ### 7.3.3 Cross Validation Performance
 
 # In[175]:
 
@@ -1035,7 +1035,7 @@ accuracy_cv_et = cross_validation(et, x_train, y_train, 5, df6, Verbose = True)
 accuracy_cv_et
 
 
-# ### Performance Plotted
+# ### 7.3.4 Performance Plotted
 
 # In[176]:
 
@@ -1051,9 +1051,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_et, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_et, figsize = (10, 5) );
 
 
-# ## Random Forest Regressor
+# ## 7.4 Random Forest Regressor
 
-# ### Model Building
+# ### 7.4.1 Model Building
 
 # In[178]:
 
@@ -1068,7 +1068,7 @@ rf.fit( x_train, y_train)
 yhat_rf = rf.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.4.2 Model Single Performance
 
 # In[179]:
 
@@ -1077,7 +1077,7 @@ accuracy_rf = accuracy(rf, x_val, y_val, yhat_rf)
 accuracy_rf
 
 
-# ### Cross Validation Performance
+# ### 7.4.3 Cross Validation Performance
 
 # In[180]:
 
@@ -1086,7 +1086,7 @@ accuracy_cv_rf = cross_validation(rf, x_train, y_train, 5, df6, Verbose = True)
 accuracy_cv_rf
 
 
-# ### Performance Plotted
+# ### 7.4.4 Performance Plotted
 
 # In[181]:
 
@@ -1102,9 +1102,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_rf, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_rf, figsize = (10, 5) );
 
 
-# ## KNN Classifier
+# ## 7.5 KNN Classifier
 
-# ### Model Building
+# ### 7.5.1 Model Building
 
 # In[183]:
 
@@ -1119,7 +1119,7 @@ knn.fit( x_train, y_train)
 yhat_knn = knn.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.5.2 Model Single Performance
 
 # In[184]:
 
@@ -1128,7 +1128,7 @@ accuracy_knn = accuracy(knn, x_val, y_val, yhat_knn)
 accuracy_knn
 
 
-# ### Cross Validation Performance
+# ### 7.5.3 Cross Validation Performance
 
 # In[185]:
 
@@ -1137,7 +1137,7 @@ accuracy_cv_knn = cross_validation(knn, x_train, y_train, 5, df6, Verbose = True
 accuracy_cv_knn
 
 
-# ### Performance Plotted
+# ### 7.5.4 Performance Plotted
 
 # In[186]:
 
@@ -1153,11 +1153,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_knn, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_knn, figsize = (10, 5) );
 
 
-# ### Cross Validation
+# ## 7.6 XGBoost Classifier
 
-# ## XGBoost Classifier
-
-# ### Model Building
+# ### 7.6.1 Model Building
 
 # In[188]:
 
@@ -1175,7 +1173,7 @@ xgboost.fit( x_train, y_train)
 yhat_xgboost = xgboost.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.6.2 Model Single Performance
 
 # In[189]:
 
@@ -1184,7 +1182,7 @@ accuracy_xgboost = accuracy(xgboost, x_val, y_val, yhat_xgboost)
 accuracy_xgboost
 
 
-# ### Cross Validation Performance
+# ### 7.6.3 Cross Validation Performance
 
 # In[190]:
 
@@ -1193,7 +1191,7 @@ accuracy_cv_xgboost = cross_validation(xgboost, x_train, y_train, 5, df6, Verbos
 accuracy_cv_xgboost
 
 
-# ### Performance Plotted
+# ### 7.6.4 Performance Plotted
 
 # In[191]:
 
@@ -1209,9 +1207,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_xgboost, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_xgboost, figsize = (10, 5) );
 
 
-# ## LightGBM Classifier
+# ## 7.7 LightGBM Classifier
 
-# ### Model Building
+# ### 7.7.1 Model Building
 
 # In[193]:
 
@@ -1226,7 +1224,7 @@ lgbm.fit( x_train, y_train)
 yhat_lgbm = lgbm.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.7.2 Model Single Performance
 
 # In[194]:
 
@@ -1235,7 +1233,7 @@ accuracy_lgbm = accuracy(lgbm, x_val, y_val, yhat_lgbm)
 accuracy_lgbm
 
 
-# ### Cross Validation Performance
+# ### 7.7.3 Cross Validation Performance
 
 # In[195]:
 
@@ -1244,7 +1242,7 @@ accuracy_cv_lgbm = cross_validation(lgbm, x_train, y_train, 5, df6, Verbose = Tr
 accuracy_cv_lgbm
 
 
-# ### Performance Plotted
+# ### 7.7.4 Performance Plotted
 
 # In[196]:
 
@@ -1260,9 +1258,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_lgbm, figsize = (10, 5));
 skplt.metrics.plot_lift_curve( y_val, yhat_lgbm, figsize = (10, 5) );
 
 
-# ## CatBoost Classifier
+# ## 7.8 CatBoost Classifier
 
-# ### Model Building
+# ### 7.8.1 Model Building
 
 # In[198]:
 
@@ -1277,7 +1275,7 @@ catboost.fit( x_train, y_train)
 yhat_catboost = catboost.predict_proba( x_val)
 
 
-# ### Model Single Performance
+# ### 7.8.2 Model Single Performance
 
 # In[199]:
 
@@ -1286,7 +1284,7 @@ accuracy_catboost = accuracy(catboost, x_val, y_val, yhat_catboost)
 accuracy_catboost
 
 
-# ### Cross Validation Performance
+# ### 7.8.3 Cross Validation Performance
 
 # In[200]:
 
@@ -1295,7 +1293,7 @@ accuracy_cv_catboost = cross_validation(catboost, x_train, y_train, 5, df6, Verb
 accuracy_cv_catboost
 
 
-# ### Performance Plotted
+# ### 7.8.4 Performance Plotted
 
 # In[201]:
 
@@ -1311,9 +1309,9 @@ skplt.metrics.plot_cumulative_gain(y_val, yhat_catboost, figsize = (10, 5));
 skplt.metrics.plot_lift_curve(y_val, yhat_catboost, figsize=(10, 5));
 
 
-# ## Comparing Models Preformance
+# ## 7.9 Comparing Models Performance
 
-# ### Single Performance
+# ### 7.9.1 Single Performance
 
 # In[203]:
 
@@ -1322,7 +1320,7 @@ models_results = pd.concat([accuracy_lr, accuracy_naive, accuracy_et, accuracy_r
 models_results.sort_values('Recall@K Mean', ascending = False)
 
 
-# ### Cross Validation Performance
+# ### 7.9.2 Cross Validation Performance
 
 # In[204]:
 
@@ -1331,9 +1329,9 @@ models_results_cv = pd.concat([accuracy_cv_lr, accuracy_cv_naive, accuracy_cv_et
 models_results_cv.sort_values('Recall@K Mean', ascending = False)
 
 
-# # Hyperparameter Fine Tuning
+# # 8 Hyperparameter Fine Tuning
 
-# ## Random Search
+# ## 8.1 Random Search
 
 # In[214]:
 
@@ -1376,7 +1374,7 @@ for i in range ( MAX_EVAL ):
 final_result.sort_values('Recall@K Mean', ascending = False)
 
 
-# ## Final Model
+# ## 8.2 Final Model
 # **The best parameters are the standard used by the Classifier**
 
 # In[218]:
@@ -1399,17 +1397,17 @@ accuracy_lgbm_tuned = cross_validation(lgbm_tuned, x_train, y_train, 5, df6, Ver
 accuracy_lgbm_tuned
 
 
-# # Performance Evaluation and Interpretation
+# # 9 Performance Evaluation and Interpretation
 
-# ## Key findings on interested customers most relevant attributes
+# ## 9.1 Key findings on interested customers most relevant attributes
 
-# ### Insight #1:
+# ### 9.1.1 Insight #1:
 
-# ### Insight #2:
+# ### 9.1.2 Insight #2:
 
-# ### Insight #3:
+# ### 9.1.3 Insight #3:
 
-# ## What percentage of interested customers the sales team will be able to contact making 20.000 calls?
+# ## 9.2 What percentage of interested customers the sales team will be able to contact making 20.000 calls?
 
 # In[220]:
 
@@ -1462,7 +1460,7 @@ plt.xticks(np.arange(0, 10.5, step = 0.5))
 plt.legend(['Final Model - LGBM Classifier', 'Random', 'Test Percentage']);
 
 
-# ## By increasing the capacity to 40,000 calls, what percentage of interested customers the sales team will be able to contact?
+# ## 9.3 By increasing the capacity to 40,000 calls, what percentage of interested customers the sales team will be able to contact?
 
 # In[223]:
 
