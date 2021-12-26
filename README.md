@@ -159,21 +159,19 @@ Performance plots show the model's ability to identify **all customers intereste
 
 ![Insight3](https://user-images.githubusercontent.com/68538809/147420356-86dbb2ad-28ff-4484-b8d3-b2a80e2ee8ff.JPG)
 
-### Insight 4. Previously Damaged Vehicle
+### Insight 4. Annual Premium
 
-> Customers with higher health insurance annual Premiums are more interested in getting a vehicle insurance.
+> Customers with higher health insurance annual premiums are more interested in getting a vehicle insurance.
 
 ![Insight4](https://user-images.githubusercontent.com/68538809/147420570-b0968368-2b2d-4675-a919-76b825099d99.JPG)
 
-### Insight 2. Sales Channels
-
-**2.** How many interest custumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested custumers.
+## **2.** How many interest custumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested custumers.
 
 With 20,000 calls, the sales team will be able to **reach 69.24%** of the interested customers. 
 
 ![Plot20000](https://user-images.githubusercontent.com/68538809/147411466-1925b693-ea2d-467f-8e0f-dd37dcff9283.JPG)
 
-**3.** How many interested custumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested custumers.
+## **3.** How many interested custumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested custumers.
 
 With 40,000 calls, the sales team will be able to **reach 98.64%** of the interested customers.
 
