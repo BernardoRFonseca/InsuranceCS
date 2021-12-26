@@ -8,7 +8,6 @@
 The company is a health insurance provider. The product team is looking into introducing a new product to their clients: vehicle insurance.
 
 Vehicle Insurance (also known as motor insurance) intends to provide financial protection against physical damage or bodily injury resulting from traffic collisions and against liability that could arise from incidents in a vehicle.
-
 Around 380,000 customers were surveyed to find out if they had an interest in joining a new vehicle insurance product. To the customers attributes database was added the interest feature.
 
 Outside of the 380,000 clients scope, the product team selected 127,000 customers that were not surveyed to be offered the new vehicle insurance product.
