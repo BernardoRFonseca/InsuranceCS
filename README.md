@@ -139,7 +139,33 @@ Performance plots show the model's ability to identify **all customers intereste
 
 # 6. Business Results
 
-**1.** Key findings on interested customers' most relevant attributes.
+## **1.** Key findings on interested customers' most relevant attributes.
+
+### Insight 1. Age
+
+> The average age of interested clients is higher than non-interested clients. Both plots disclose well how younger clients are not as interested as older clients. 
+
+![Insight1](https://user-images.githubusercontent.com/68538809/147419338-12614b60-af99-42fe-bfc9-30e659e43c0f.JPG)
+
+### Insight 2. Vehicles Age
+
+> Interest is greater on customers' with vehicles age between 1 and 2 years old.
+
+![Insight2](https://user-images.githubusercontent.com/68538809/147420148-6b78b6fa-43c1-4d33-83db-b8b7da0a8f61.JPG)
+
+### Insight 3. Previously Damaged Vehicle
+
+> Interest is greater on customers' that had his/her vehicle damaged in the past.
+
+![Insight3](https://user-images.githubusercontent.com/68538809/147420356-86dbb2ad-28ff-4484-b8d3-b2a80e2ee8ff.JPG)
+
+### Insight 4. Previously Damaged Vehicle
+
+> Customers with higher health insurance annual Premiums are more interested in getting a vehicle insurance.
+
+![Insight4](https://user-images.githubusercontent.com/68538809/147420570-b0968368-2b2d-4675-a919-76b825099d99.JPG)
+
+### Insight 2. Sales Channels
 
 **2.** How many interest custumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested custumers.
 
