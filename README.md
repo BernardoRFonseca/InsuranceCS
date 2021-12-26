@@ -118,20 +118,23 @@ The following Machine Learning model were tested and cross-validated:
 To evaluate the performance of the models, 4 metrics were used:
 
 **ROC AUC**
+
 **Precision at k**
+
 **Recall at k**
+
 **F1_Score**
 
 The indicator "Recall at K" was the one to assume the major importance as it represents the proportion of relevante items found within the total number of defined item.
 
 The following table discloses the cross-validated ("real") performance of all the models used.
-**Catboost Classifier"** the best Recall at k result, making it the one be used.
+**LGBM Classifier"** the best Recall at k result, making it the one be used.
 
-![CVResults](https://user-images.githubusercontent.com/68538809/145123116-573d3ddb-aab6-4af7-b80f-cae3496bf2b4.jpg)
+![CVResults]((https://user-images.githubusercontent.com/68538809/147411461-cb319f17-615f-4ea6-af85-9b0c1870a19f.JPG)
 
 Performance plots show the ability of the modelling identifying **all customers interested** in purchasing the product using approximatily **50% of the sample** (Cumulative Gain Curve). It is also possible to see that the model is initially **more than 3 times better than a random selection** (Lift Curve). It is important to notice that even after reaching half the sample, the model remains to perform 2 times better than a random method. 
 
-![PerformancePlots](https://user-images.githubusercontent.com/68538809/145126433-eb04613f-9910-4e97-8754-73638b5a55cd.png)
+![PerformancePlots](https://user-images.githubusercontent.com/68538809/147411463-07396ba0-0506-4dbd-bcb8-4a8d30cb4acc.png)
 
 # 6. Business Results
 
@@ -139,15 +142,15 @@ Performance plots show the ability of the modelling identifying **all customers 
 
 **2.** How many interest costumers will the sales team be able to reach with 20,000 phone calls, and how much does that represent of the overall interested costumers.
 
-With 20,000 calls, the sales team will be able to **reach 69.37%** of the interested customers. 
+With 20,000 calls, the sales team will be able to **reach 69.24%** of the interested customers. 
 
-![Plot20000](https://user-images.githubusercontent.com/68538809/145128483-3fd5f62e-3760-466e-a11f-fa82c3a7bff5.JPG)
+![Plot20000](https://user-images.githubusercontent.com/68538809/147411466-1925b693-ea2d-467f-8e0f-dd37dcff9283.JPG)
 
 **3.** How many interest costumers would the sales team be able to reach if the budget was increased to 40,000 calls, and how much that represents of the overall interested costumers.
 
-With 40,000 calls, the sales team will be able to **reach 98.67%** of the interested customers.
+With 40,000 calls, the sales team will be able to **reach 98.64%** of the interested customers.
 
-![Plot40000](https://user-images.githubusercontent.com/68538809/145128487-6080c55e-4aa8-4662-855b-17485d0cf037.JPG)
+![Plot40000](https://user-images.githubusercontent.com/68538809/147411469-80b1ef88-506e-429f-b474-c6cab8ef0874.JPG)
 
 
 # 7. Conclusions
