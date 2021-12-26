@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Imports
+# # 1. Imports
 
-# In[314]:
+# In[1]:
 
 
 import pandas                 as pd
@@ -35,11 +35,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# ## Helper Functions
+# ## 1.1 Helper Functions
 
-# ### Models Performance
+# ### 1.1.1 Models Performance
 
-# In[179]:
+# In[2]:
 
 
 # definition of precision_at_k for the top 20.000 clients as default
@@ -144,9 +144,9 @@ def cross_validation(model, x_train, y_train, k, data, Verbose = True):
     return df
 
 
-# ### Graphic
+# ### 1.1.2 Graphic
 
-# In[ ]:
+# In[3]:
 
 
 def jupyter_settings():
@@ -167,31 +167,31 @@ def jupyter_settings():
 jupyter_settings();
 
 
-# ## Loading Data 
+# ## 1.2 Loading Data 
 
-# In[3]:
+# In[92]:
 
 
 df_raw = pd.read_csv('data/train.csv')
 
 
-# # Data Details
+# # 2. Data Details
 
-# In[4]:
+# In[93]:
 
 
 df2 = df_raw.copy()
 
 
-# In[5]:
+# In[94]:
 
 
 df2.head()
 
 
-# ## Data Dictionary
+# ## 2.1 Data Dictionary
 
-# |The data set that we're using is from Kaggle (https://www.kaggle.com/anmolkumar/health-insurance-cross-sell-prediction).
+# |The data set that I am using is from Kaggle (https://www.kaggle.com/anmolkumar/health-insurance-cross-sell-prediction).
 # 
 # 
 # 
@@ -199,6 +199,7 @@ df2.head()
 # |:---------------------------|:---------------
 # | **Id**                         | Unique ID for the customer   | 
 # | **Gender**                           | Gender of the customer   | 
+# | **Age**                           | Age of the customer   | 
 # | **Driving License**                                   | 0, customer does not have DL; 1, customer already has DL  | 
 # | **Region Code**                               | Unique code for the region of the customer   | 
 # | **Previously Insured**                     | 1, customer already has vehicle insurance; 0, customer doesn't have vehicle insurance | 
@@ -209,9 +210,9 @@ df2.head()
 # | **Vintage**                | Number of Days, customer has been associated with the company  | 
 # | **Response**              | 1, customer is interested; 0, customer is not interested. |    
 
-# ## Rename Columns
+# ## 2.2 Rename Columns
 
-# In[6]:
+# In[95]:
 
 
 cols_old = ['id', 'Gender', 'Age', 'Driving_License', 'Region_Code', 'Previously_Insured', 'Vehicle_Age', 'Vehicle_Damage', 'Annual_Premium', 
@@ -225,34 +226,34 @@ cols_new = list( map( snakecase, cols_old ) )
 df2.columns = cols_new
 
 
-# ## Data Dimensions
+# ## 2.3 Data Dimensions
 
-# In[7]:
+# In[96]:
 
 
 print ('Number of Rows: {}'.format( df2.shape[0]))
 print ('Number of Columns: {}'.format( df2.shape[1]))
 
 
-# ## Data Types
+# ## 2.4 Data Types
 
-# In[8]:
+# In[97]:
 
 
 df2.dtypes
 
 
-# ## Missing Values
+# ## 2.5 Missing Values
 
-# In[9]:
+# In[98]:
 
 
 df2.isna().sum()
 
 
-# ## Change Types
+# ## 2.6 Change Types
 
-# In[10]:
+# In[99]:
 
 
 # changing data types from float to int64
@@ -264,10 +265,9 @@ df2['policy_sales_channel'] = df2['policy_sales_channel'].astype('int64')
 df2['annual_premium'] = df2['annual_premium'].astype('int64')    
 
 
-# ## Descriptive Statistics
-# 
+# ## 2.7 Descriptive Statistics
 
-# In[11]:
+# In[100]:
 
 
 # Split numerical and categorical features
@@ -275,9 +275,9 @@ num_attributes = df2.select_dtypes( include=['int64', 'float64'])
 cat_attributes = df2.select_dtypes( exclude=['int64', 'float64'])
 
 
-# ### Numerical Attributes
+# ### 2.7.1 Numerical Attributes
 
-# In[12]:
+# In[101]:
 
 
 #Central Tendency - mean, meadian
@@ -308,9 +308,9 @@ m
 # 
 # **Response** 12.23% of the clients showed to be interest in purchasing a vehicle insurance.
 
-# ### Categorical Attributes
+# ### 2.7.2 Categorical Attributes
 
-# In[13]:
+# In[102]:
 
 
 # add percentage of most common attribute
@@ -327,7 +327,7 @@ cat_attributes_p
 
 # **TOP 3 Combos Categorical Attributes**
 
-# In[14]:
+# In[103]:
 
 
 categorical_combo = pd.DataFrame(round(cat_attributes.value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
@@ -341,58 +341,121 @@ display(categorical_combo)
 # 
 # **3.** Males with car newer than 1 year old that never got vehicle damage in the past
 
-# # Feature Engineering
+# # 3 Feature Engineering
 
-# In[15]:
+# In[104]:
 
 
 df3 = df2.copy()
 
 
-# ## Features Creation 
+# ## 3.1 Features Creation 
 
-# In[16]:
+# In[105]:
 
 
 # vehicle age
-df3['vehicle_age']= df3['vehicle_age'].apply( lambda x: 'over_2_years' if x == '> 2 Years' else 'between_1_2year' if x== '1-2 Year' else 'between_1_2_year')
+df3['vehicle_age']= df3['vehicle_age'].apply( lambda x: 'over_2_years' if x == '> 2 Years' else 'between_1_2_years' if x== '1-2 Year' else 'under_1_year')
 # vehicle damage
 df3['vehicle_damage'] = df3['vehicle_damage'].apply( lambda x: 1 if x == 'Yes' else 0 )
 
 
-# ## Mind Map
+# ## 3.2 Mind Map
 
-# # Exploratory Data Analysis (EDA)
+# In[106]:
 
-# In[17]:
+
+Image ('img/mindmap.png')
+
+
+# ## 3.3 Hypothesis Formulation
+
+# ### 3.3.1 User/Client
+
+# **1.** Interest is greater on older people (over 45)
+# 
+# **2.** Interest is greater on female
+# 
+# **3.** Interest is greater on customers holding a driving license
+# 
+# **4.** Interest is greater on customers with higher household numbers
+# 
+# **5.** Interest is greater on customers with higher annual income
+# 
+# **6.** Interest is greater on more time associated users (over 150 days)
+
+# ### 3.3.2 Vehicle
+
+# **1.** Interest is greater with newer vehicles
+# 
+# **2.** Interest is greater with higher historical number of owners
+# 
+# **3.** Interest is greater with higher modification vehicles
+# 
+# **4.** Interest is greater with bigger engine size
+# 
+# **5.** Interest is greater with previously damaged vehicles
+# 
+# **6.** Interest is greater with higher value vehicles
+
+# ### 3.3.3 Insurance
+
+# **1.** Interest is greater on previously insured owners
+# 
+# **2.** Interest is greater on phone driven sales
+# 
+# **3.** Interest is greater on higher annual premiums (over 30k/year)
+
+# ## 3.4 Final List of Hypothesis
+# **This comprises the list of hypothesis that can be tested with currently available data**
+
+# **1.** Interest is greater on older people (over 45)
+# 
+# **2.** Interest is greater on female
+# 
+# **3.** Interest is greater on customers holding a driving license
+# 
+# **4.** Interest is greater on more time associated users (over 150 days)
+# 
+# **5.** Interest is greater with newer vehicles
+# 
+# **6.** Interest is greater with previously damaged vehicles
+# 
+# **7.** Interest is greater on previously insured owners
+# 
+# **8.** Interest is greater on higher annual premiums (over 30k/year)
+
+# # 4 Exploratory Data Analysis (EDA)
+
+# In[107]:
 
 
 df4 = df3.copy()
 
 
-# ## Univariate Analysis
+# ## 4.1 Univariate Analysis
 
-# ### Response Variable
+# ### 4.4.1 Response Variable
 
-# In[18]:
+# In[108]:
 
 
 sns.countplot(x = 'response', data=df4);
 
 
-# ### Numerical Variables
+# ### 4.1.2 Numerical Variables
 
-# In[19]:
+# In[109]:
 
 
 num_attributes.hist(bins=25);
 
 
-# #### Age
+# #### 4.1.2.1 Age
 # 
 # **Findings** The average age of interested clients is higher than non-interested clients. Both plots disclose well how younger clients are not as interested as older clients.
 
-# In[20]:
+# In[110]:
 
 
 plt.subplot(1, 2, 1)
@@ -402,10 +465,10 @@ plt.subplot(1, 2, 2)
 sns.histplot(df4, x='age', hue='response');
 
 
-# #### Driving Licence
+# #### 4.1.2.2 Driving Licence
 # **Findings** Only clients holding a driving license are part of the dataset. 12% are potential vehicle insurance customers
 
-# In[21]:
+# In[111]:
 
 
 aux2 = pd.DataFrame(round(df4[['driving_license', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
@@ -413,16 +476,16 @@ aux2['count'] = (aux2['%'] * df4.shape[0]).astype(int)
 aux2
 
 
-# In[22]:
+# In[112]:
 
 
 aux2 = df4[['driving_license', 'response']].groupby( 'response' ).sum().reset_index()
 sns.barplot( x='response', y='driving_license', data=aux2 );
 
 
-# #### Region Code
+# #### 4.1.2.3 Region Code
 
-# In[23]:
+# In[113]:
 
 
 aux3 = df4[['id', 'region_code', 'response']].groupby( ['region_code', 'response'] ).count().reset_index()
@@ -430,10 +493,10 @@ aux3 = aux3[(aux3['id'] > 1000) & (aux3['id'] < 20000)]
 sns.scatterplot( x='region_code', y='id', hue='response', data=aux3 );
 
 
-# #### Previously Insured
+# #### 4.1.2.4 Previously Insured
 # **Findings** All potential vehicle insurance customers have never held an insurance. 46% of our clients already have vehicle insurance and are not interested.
 
-# In[24]:
+# In[114]:
 
 
 aux4 = pd.DataFrame(round(df4[['previously_insured', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
@@ -441,35 +504,25 @@ aux4['count'] = (aux4['%'] * df4.shape[0]).astype(int)
 aux4
 
 
-# In[25]:
+# In[115]:
 
 
 sns.barplot(data=aux4, x='previously_insured', y='count', hue='response');
 
 
-# #### Annual Premium
+# #### 4.1.2.5 Annual Premium
 # **Findings** Annual premiums for both interested and non-interested clients are very similar.
 
-# In[26]:
+# In[116]:
 
 
 aux5 = df4[(df4['annual_premium'] <100000)]
 sns.boxplot( x='response', y='annual_premium', data=aux5 );
 
 
-# #### Policy Sales Channel
-# **Findings**
+# #### 4.1.2.6 Policy Sales Channel
 
-# In[27]:
-
-
-aux6 = df4[['policy_sales_channel', 'response']].groupby( 'policy_sales_channel' ).sum().reset_index()
-
-plt.xticks(rotation=90)
-ax6 = sns.barplot( x='response', y='policy_sales_channel', data=aux6, order = aux6['response']);
-
-
-# In[28]:
+# In[117]:
 
 
 aux6 = df4[['policy_sales_channel', 'response']].groupby( 'policy_sales_channel' ).sum().reset_index()
@@ -478,10 +531,9 @@ plt.xticks(rotation=90)
 ax6 = sns.barplot( x='response', y='policy_sales_channel', data=aux6, order = aux6['response']);
 
 
-# #### Vintage
-# **Findings**
+# #### 4.1.2.7 Vintage
 
-# In[29]:
+# In[118]:
 
 
 plt.subplot(1, 2, 1)
@@ -491,27 +543,27 @@ plt.subplot(1, 2, 2)
 sns.histplot(df4, x='vintage', hue='response');
 
 
-# ### Categorical Variables
+# ### 4.1.3 Categorical Variables
 
-# #### Gender
+# #### 4.1.3.1 Gender
 
-# In[30]:
+# In[119]:
 
 
-aux7 = pd.DataFrame(round(df4[['gender', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
-aux7['count'] = (aux7['%'] * df4.shape[0]).astype(int)
+aux7=pd.crosstab(df3['gender'], df3['response'])
+aux7['percent'] = aux22[1]/(aux22[1]+aux22[0])
 aux7
 
 
-# In[31]:
+# In[120]:
 
 
-sns.barplot(data=aux7, x='gender', y='count', hue='response');
+sns.countplot(x= df3['gender'], hue=df3['response']);
 
 
-# #### Vehicle Age
+# #### 4.1.3.2 Vehicle Age
 
-# In[32]:
+# In[121]:
 
 
 aux8 = pd.DataFrame(round(df4[['vehicle_age', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
@@ -519,15 +571,15 @@ aux8['count'] = (aux8['%'] * df4.shape[0]).astype(int)
 aux8
 
 
-# In[33]:
+# In[122]:
 
 
 sns.barplot(data=aux8, x='vehicle_age', y='count', hue='response');
 
 
-# #### Vehicle Damage
+# #### 4.1.3.3 Vehicle Damage
 
-# In[34]:
+# In[123]:
 
 
 aux9 = pd.DataFrame(round(df4[['vehicle_damage', 'response']].value_counts(normalize=True) * 100)).reset_index().rename(columns={0: '%'})
@@ -535,20 +587,179 @@ aux9['count'] = (aux9['%'] * df4.shape[0]).astype(int)
 aux9
 
 
-# In[35]:
+# In[124]:
 
 
 sns.barplot(data=aux9, x='vehicle_damage', y='count', hue='response');
 
 
-# ## Bivariate Analysis
+# ## 4.2 Bivariate Analysis
+
+# ### 4.2.1 H1. Interest is greater on older people (over 45)
+# **True** Hypothesis
+
+# In[126]:
+
+
+aux211 = df4[df4['age']>45][['id','response']]
+aux212 = df4[df4['age']<=45][['id','response']]
+
+fig, axs = plt.subplots(ncols= 2, figsize = (15,4))
+sns.countplot(aux211['response'], ax=axs[0]).set_title('Age > 45')
+sns.countplot(aux212['response'], ax=axs[1]).set_title('Age <= 45');
+
+
+# In[127]:
+
+
+print('% Interested in vehicle insurance for people + 45 years old: {0:.2f}'.format(100*(aux211[aux211['response']==1]['response'].count()/(aux211[aux211['response']==1]['response'].count()+aux211[aux211['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for people - 45 years old: {0:.2f}'.format(100*(aux212[aux212['response']==1]['response'].count()/(aux212[aux212['response']==1]['response'].count()+aux212[aux212['response']==0]['response'].count()))))
+
+
+# ### 4.2.2 H2. Interest is greater on female
+# **False** Hypothesis
+
+# In[128]:
+
+
+fig, axs = plt.subplots(figsize = (15,8))
+sns.countplot(x= df4['gender'], hue=df4['response']);
+
+
+# In[129]:
+
+
+aux22=pd.crosstab(df4['gender'], df4['response'])
+aux22['percentage'] = aux22[1]/(aux22[1]+aux22[0])
+aux22
+
+
+# ### 4.2.3 H3. Interest is greater on customers holding a driving license
+# **True** Hypothesis
+
+# In[130]:
+
+
+fig, axs = plt.subplots(figsize = (15,8))
+sns.countplot(x= df4['driving_license'], hue=df4['response']);
+
+
+# In[131]:
+
+
+aux23=pd.crosstab(df4['driving_license'], df4['response'])
+aux23['percentage'] = aux23[1]/(aux23[1]+aux23[0])
+aux23
+
+
+# ### 4.2.4 H4. Interest is greater on more time associated users (over 150 days)
+# **False** Hypothesis
+
+# In[132]:
+
+
+aux241 = df4[df4['vintage']>150][['id','response']]
+aux242 = df4[df4['vintage']<=150][['id','response']]
+
+fig, axs = plt.subplots(ncols= 2, figsize = (15,4))
+sns.countplot(aux241['response'], ax=axs[0]).set_title('Vintage > 150')
+sns.countplot(aux242['response'], ax=axs[1]).set_title('Vintage <= 150');
+
+
+# In[133]:
+
+
+print('% Interested in vehicle insurance for customers vintage under 150 days: {0:.2f}'.format(100*(aux242[aux242['response']==1]['response'].count()/(aux242[aux242['response']==1]['response'].count()+aux242[aux242['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for customers vintage over 150 days: {0:.2f}'.format(100*(aux241[aux241['response']==1]['response'].count()/(aux241[aux241['response']==1]['response'].count()+aux241[aux241['response']==0]['response'].count()))))
+
+
+# ### 4.2.5 Interest is greater with newer vehicles
+# **False,** Hypothesis
+
+# In[137]:
+
+
+aux251 = df4[df4['vehicle_age']=='under_1_year'][['id','response']]
+aux252 = df3[df3['vehicle_age']=='between_1_2_years'][['id','response']]
+aux253 = df3[df3['vehicle_age']=='over_2_years'][['id','response']]
+
+fig, axs = plt.subplots(ncols= 3, figsize = (15,4))
+sns.countplot(aux251['response'], ax=axs[0]).set_title('Vehicle Age < 1 Year')
+sns.countplot(aux252['response'], ax=axs[1]).set_title('Vehicle Age Between 1-2 Years')
+sns.countplot(aux253['response'], ax=axs[2]).set_title('Vehicle Age > 2 Years');
+
+
+# In[139]:
+
+
+print('% Interested in vehicle insurance for customers with cars age under 1 year: {0:.2f}'.format(100*(aux251[aux251['response']==1]['response'].count()/(aux251[aux251['response']==1]['response'].count()+aux251[aux251['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for customers with cars age between 1 and 2 years: {0:.2f}'.format(100*(aux252[aux252['response']==1]['response'].count()/(aux252[aux252['response']==1]['response'].count()+aux252[aux252['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for customers with cars age over 2 years: {0:.2f}'.format(100*(aux253[aux253['response']==1]['response'].count()/(aux253[aux253['response']==1]['response'].count()+aux253[aux253['response']==0]['response'].count()))))
+
+
+# ### 4.2.6 Interest is greater with previously damaged vehicles
+# **True,** Hypothesis
+
+# In[142]:
+
+
+fig, axs = plt.subplots(figsize = (15,8))
+sns.countplot(df4['vehicle_damage'], hue=df4['response']);
+
+
+# In[145]:
+
+
+aux26=pd.crosstab(df4['vehicle_damage'], df4['response'])
+aux26['percentage'] = aux26[1]/(aux26[1]+aux26[0])
+aux26
+
+
+# ### 4.2.7 Interest is greater on previously insured owners
+# **False,** Hypothesis
+
+# In[144]:
+
+
+fig, axs = plt.subplots( figsize = (15,8))
+sns.countplot(df4['previously_insured'], hue=df4['response']);
+
+
+# In[146]:
+
+
+aux27=pd.crosstab(df4['previously_insured'], df4['response'])
+aux27['percentage'] = aux27[1]/(aux27[1]+aux27[0])
+aux27
+
+
+# ### 2.4.8 Interest is greater on higher annual premiums (over 30k/year)
+# **False,** Hypothesis
+
+# In[149]:
+
+
+aux281 = df4[df4['annual_premium']>30000][['id','response']]
+aux282 = df4[df4['annual_premium']<=30000][['id','response']]
+
+fig, axs = plt.subplots(ncols= 2, figsize = (15,4))
+sns.countplot(aux281['response'], ax=axs[0]).set_title('Annual_premium > 30k')
+sns.countplot(aux282['response'], ax=axs[1]).set_title('Annual_premium < 30k');
+
+
+# In[151]:
+
+
+print('% Interested in vehicle insurance for customers with health insurance premium under 30k/year: {0:.2f}'.format(100*(aux252[aux252['response']==1]['response'].count()/(aux252[aux252['response']==1]['response'].count()+aux252[aux252['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for customers with health insurance premium over 30k/year: {0:.2f}'.format(100*(aux251[aux251['response']==1]['response'].count()/(aux251[aux251['response']==1]['response'].count()+aux251[aux251['response']==0]['response'].count()))))
+
 
 # ## Multivariate Analysis
 
 # ### Numerical Attributed
 # **Finding** Having the target variable in scope, the stronger correlations with feature 'Previously Insured' (-0.34), 'Policy Sales Channel' (-0.14) and 'Age' (0.11). Outside the target variable scope, between Age and Policy Sales Chanel there is strong negative correlation of -0.58), 'Previously Insured' and 'Age' of -0.25 and last between 'Previously Insured' and 'Policy Sales Channel' 0.22. 
 
-# In[36]:
+# In[152]:
 
 
 corr_matrix= num_attributes.corr()
@@ -560,7 +771,7 @@ sns.heatmap(corr_matrix, mask = mask, annot = True, square = True, cmap='YlGnBu'
 
 # # Data Preparation
 
-# In[37]:
+# In[153]:
 
 
 df5 = df4.copy()
@@ -568,7 +779,7 @@ df5 = df4.copy()
 
 # ## Standardization of DataSets 
 
-# In[38]:
+# In[154]:
 
 
 df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].values)
@@ -576,7 +787,7 @@ df5['annual_premium'] = StandardScaler().fit_transform( df5[['annual_premium']].
 
 # ## Rescaling
 
-# In[39]:
+# In[155]:
 
 
 mms = MinMaxScaler()
@@ -592,7 +803,7 @@ df5['vintage'] = mms.fit_transform( df5[['vintage']].values)
 
 # ### Encoding
 
-# In[40]:
+# In[156]:
 
 
 #gender - target encoder
@@ -613,7 +824,7 @@ df5['policy_sales_channel'] = df5['policy_sales_channel'].map(fe_policy_sales_ch
 
 # # Feature Selection
 
-# In[41]:
+# In[157]:
 
 
 df6 = df5.copy()
@@ -621,7 +832,7 @@ df6 = df5.copy()
 
 # ## Split dataframe into training and test
 
-# In[42]:
+# In[158]:
 
 
 X = df6.drop('response', axis=1)
@@ -634,7 +845,7 @@ df6 = pd.concat ( [x_train, y_train], axis = 1)
 
 # ## Feature Importance
 
-# In[43]:
+# In[159]:
 
 
 forest = ensemble.ExtraTreesClassifier( n_estimators = 250, random_state = 42, n_jobs = -1)
@@ -644,7 +855,7 @@ y_train_n = y_train.values
 forest.fit( x_train_n, y_train_n)
 
 
-# In[44]:
+# In[160]:
 
 
 importances = forest.feature_importances_
@@ -670,14 +881,14 @@ plt.show()
 
 # # Machine Learning Modelling
 
-# In[45]:
+# In[162]:
 
 
 #I will use as well 'driving_license' as it seemes an importante feature in EDA
 cols_selected = ['vintage', 'annual_premium', 'age', 'region_code', 
                  'vehicle_damage', 'policy_sales_channel', 'driving_license']
 
-cols_not_selected = ['previously_insured', 'vehicle_age_between_1_2_year', 'vehicle_age_between_1_2year', 'gender', 'vehicle_age_over_2_years']
+cols_not_selected = ['previously_insured', 'vehicle_age_between_1_2_years', 'vehicle_age_under_1_year', 'gender', 'vehicle_age_over_2_years']
 
 #create df to be used for business understading
 x_validation = x_val.drop(cols_not_selected, axis=1)
@@ -691,7 +902,7 @@ x_val = x_val[cols_selected]
 
 # ### Model Building
 
-# In[180]:
+# In[163]:
 
 
 #define model
@@ -706,7 +917,7 @@ yhat_lr = lr.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[181]:
+# In[164]:
 
 
 accuracy_lr = accuracy(lr, x_val, y_val, yhat_lr)
@@ -715,7 +926,7 @@ accuracy_lr
 
 # ### Cross Validation Performance
 
-# In[182]:
+# In[165]:
 
 
 accuracy_cv_lr = cross_validation(lr, x_train, y_train, 5, df6, Verbose = True)
@@ -724,25 +935,25 @@ accuracy_cv_lr
 
 # ### Performance Plotted
 
-# In[48]:
+# In[166]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_lr);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_lr, figsize = (10, 5));
 
 
-# In[49]:
+# In[167]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_lr );
+skplt.metrics.plot_lift_curve( y_val, yhat_lr, figsize = (10, 5) );
 
 
 # ## Naive Bayes
 
 # ### Model Building
 
-# In[183]:
+# In[168]:
 
 
 #define model
@@ -757,7 +968,7 @@ yhat_naive = naive.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[184]:
+# In[169]:
 
 
 accuracy_naive = accuracy(naive, x_val, y_val, yhat_naive)
@@ -766,7 +977,7 @@ accuracy_naive
 
 # ### Cross Validation Performance
 
-# In[174]:
+# In[170]:
 
 
 accuracy_cv_naive = cross_validation(naive, x_train, y_train, 5, df6, Verbose = True)
@@ -775,25 +986,25 @@ accuracy_cv_naive
 
 # ### Performance Plotted
 
-# In[52]:
+# In[171]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_naive);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_naive, figsize = (10, 5));
 
 
-# In[53]:
+# In[172]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_naive );
+skplt.metrics.plot_lift_curve( y_val, yhat_naive, figsize = (10, 5) );
 
 
 # ## Extra Trees
 
 # ### Model Building
 
-# In[185]:
+# In[173]:
 
 
 #define model
@@ -808,7 +1019,7 @@ yhat_et = et.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[186]:
+# In[174]:
 
 
 accuracy_et = accuracy(et, x_val, y_val, yhat_et)
@@ -817,7 +1028,7 @@ accuracy_et
 
 # ### Cross Validation Performance
 
-# In[187]:
+# In[175]:
 
 
 accuracy_cv_et = cross_validation(et, x_train, y_train, 5, df6, Verbose = True)
@@ -826,25 +1037,25 @@ accuracy_cv_et
 
 # ### Performance Plotted
 
-# In[56]:
+# In[176]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_et);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_et, figsize = (10, 5));
 
 
-# In[57]:
+# In[177]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_et );
+skplt.metrics.plot_lift_curve( y_val, yhat_et, figsize = (10, 5) );
 
 
 # ## Random Forest Regressor
 
 # ### Model Building
 
-# In[188]:
+# In[178]:
 
 
 #define model
@@ -859,7 +1070,7 @@ yhat_rf = rf.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[189]:
+# In[179]:
 
 
 accuracy_rf = accuracy(rf, x_val, y_val, yhat_rf)
@@ -868,7 +1079,7 @@ accuracy_rf
 
 # ### Cross Validation Performance
 
-# In[190]:
+# In[180]:
 
 
 accuracy_cv_rf = cross_validation(rf, x_train, y_train, 5, df6, Verbose = True)
@@ -877,25 +1088,25 @@ accuracy_cv_rf
 
 # ### Performance Plotted
 
-# In[60]:
+# In[181]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_rf);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_rf, figsize = (10, 5));
 
 
-# In[61]:
+# In[182]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_rf );
+skplt.metrics.plot_lift_curve( y_val, yhat_rf, figsize = (10, 5) );
 
 
 # ## KNN Classifier
 
 # ### Model Building
 
-# In[191]:
+# In[183]:
 
 
 #define model
@@ -910,7 +1121,7 @@ yhat_knn = knn.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[192]:
+# In[184]:
 
 
 accuracy_knn = accuracy(knn, x_val, y_val, yhat_knn)
@@ -919,7 +1130,7 @@ accuracy_knn
 
 # ### Cross Validation Performance
 
-# In[193]:
+# In[185]:
 
 
 accuracy_cv_knn = cross_validation(knn, x_train, y_train, 5, df6, Verbose = True)
@@ -928,18 +1139,18 @@ accuracy_cv_knn
 
 # ### Performance Plotted
 
-# In[64]:
+# In[186]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_knn);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_knn, figsize = (10, 5));
 
 
-# In[65]:
+# In[187]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_knn );
+skplt.metrics.plot_lift_curve( y_val, yhat_knn, figsize = (10, 5) );
 
 
 # ### Cross Validation
@@ -948,7 +1159,7 @@ skplt.metrics.plot_lift_curve( y_val, yhat_knn );
 
 # ### Model Building
 
-# In[194]:
+# In[188]:
 
 
 #define model
@@ -966,7 +1177,7 @@ yhat_xgboost = xgboost.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[195]:
+# In[189]:
 
 
 accuracy_xgboost = accuracy(xgboost, x_val, y_val, yhat_xgboost)
@@ -975,7 +1186,7 @@ accuracy_xgboost
 
 # ### Cross Validation Performance
 
-# In[196]:
+# In[190]:
 
 
 accuracy_cv_xgboost = cross_validation(xgboost, x_train, y_train, 5, df6, Verbose = True)
@@ -984,25 +1195,25 @@ accuracy_cv_xgboost
 
 # ### Performance Plotted
 
-# In[68]:
+# In[191]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_xgboost);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_xgboost, figsize = (10, 5));
 
 
-# In[69]:
+# In[192]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_xgboost );
+skplt.metrics.plot_lift_curve( y_val, yhat_xgboost, figsize = (10, 5) );
 
 
 # ## LightGBM Classifier
 
 # ### Model Building
 
-# In[201]:
+# In[193]:
 
 
 #define model
@@ -1017,7 +1228,7 @@ yhat_lgbm = lgbm.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[202]:
+# In[194]:
 
 
 accuracy_lgbm = accuracy(lgbm, x_val, y_val, yhat_lgbm)
@@ -1026,7 +1237,7 @@ accuracy_lgbm
 
 # ### Cross Validation Performance
 
-# In[203]:
+# In[195]:
 
 
 accuracy_cv_lgbm = cross_validation(lgbm, x_train, y_train, 5, df6, Verbose = True)
@@ -1035,25 +1246,25 @@ accuracy_cv_lgbm
 
 # ### Performance Plotted
 
-# In[72]:
+# In[196]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_lgbm);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_lgbm, figsize = (10, 5));
 
 
-# In[73]:
+# In[197]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_lgbm );
+skplt.metrics.plot_lift_curve( y_val, yhat_lgbm, figsize = (10, 5) );
 
 
 # ## CatBoost Classifier
 
 # ### Model Building
 
-# In[197]:
+# In[198]:
 
 
 #define model
@@ -1068,7 +1279,7 @@ yhat_catboost = catboost.predict_proba( x_val)
 
 # ### Model Single Performance
 
-# In[198]:
+# In[199]:
 
 
 accuracy_catboost = accuracy(catboost, x_val, y_val, yhat_catboost)
@@ -1077,7 +1288,7 @@ accuracy_catboost
 
 # ### Cross Validation Performance
 
-# In[199]:
+# In[200]:
 
 
 accuracy_cv_catboost = cross_validation(catboost, x_train, y_train, 5, df6, Verbose = True)
@@ -1086,25 +1297,25 @@ accuracy_cv_catboost
 
 # ### Performance Plotted
 
-# In[76]:
+# In[201]:
 
 
 # Accumulative Gain
-skplt.metrics.plot_cumulative_gain(y_val, yhat_catboost);
+skplt.metrics.plot_cumulative_gain(y_val, yhat_catboost, figsize = (10, 5));
 
 
-# In[77]:
+# In[202]:
 
 
 # Lift Curve
-skplt.metrics.plot_lift_curve( y_val, yhat_catboost );
+skplt.metrics.plot_lift_curve(y_val, yhat_catboost, figsize=(10, 5));
 
 
 # ## Comparing Models Preformance
 
 # ### Single Performance
 
-# In[205]:
+# In[203]:
 
 
 models_results = pd.concat([accuracy_lr, accuracy_naive, accuracy_et, accuracy_rf, accuracy_knn, accuracy_xgboost, accuracy_lgbm, accuracy_catboost])
@@ -1113,7 +1324,7 @@ models_results.sort_values('Recall@K Mean', ascending = False)
 
 # ### Cross Validation Performance
 
-# In[206]:
+# In[204]:
 
 
 models_results_cv = pd.concat([accuracy_cv_lr, accuracy_cv_naive, accuracy_cv_et, accuracy_cv_rf, accuracy_cv_knn, accuracy_cv_xgboost, accuracy_cv_lgbm, accuracy_cv_catboost])
@@ -1124,23 +1335,22 @@ models_results_cv.sort_values('Recall@K Mean', ascending = False)
 
 # ## Random Search
 
-# In[237]:
+# In[214]:
 
 
 import random
 
-param = {'depth' : [1, 2, 5, 10, 16],
-         'iterations': [50, 100],
+param = {'num_leaves' : [2, 5, 10, 30, 50],
+         'max_depth' : [-1, 0, 1, 5, 20],
+         'num_iterations': [50, 100],
          'learning_rate' : [0.001, 0.01, 0.1, 0.2, 0.3],
-         'l2_leaf_reg' : [1, 2, 5, 10, 100],
-         'border_count' : [5, 25, 50, 100, 200],
          'random_state' : [22]
         }
 
 MAX_EVAL = 10
 
 
-# In[238]:
+# In[215]:
 
 
 final_result = pd.DataFrame({'ROC AUC': [], 'Precision@K Mean': [], 'Recall@K Mean': [], 'F1_Score': [] })
@@ -1152,17 +1362,16 @@ for i in range ( MAX_EVAL ):
     print( 'Step ' +str(i +1) + '/' + str(MAX_EVAL))
     print( hp )
     # model
-    model_catboost = CatBoostClassifier(depth=hp['depth'],
-                          iterations = hp['iterations'],
-                          learning_rate=hp['learning_rate'],
-                          l2_leaf_reg=hp['l2_leaf_reg'],
-                          border_count =hp['border_count'],
-                          random_state=hp['random_state'])
-
+    model_lgbm = LGBMClassifier(num_leaves=hp['num_leaves'],
+                                max_depth = hp['max_depth'],
+                                num_iterations = hp['num_iterations'],
+                                learning_rate=hp['learning_rate'],
+                                random_state=hp['random_state'])
+                                      
 
     # performance
-    model_catboost_result = cross_validation(model_catboost, x_train, y_train, 5, df6, Verbose = True)
-    final_result = pd.concat([final_result, model_catboost_result])
+    model_lgbm_result = cross_validation(model_lgbm, x_train, y_train, 5, df6, Verbose = False)
+    final_result = pd.concat([final_result, model_lgbm_result])
     
 final_result.sort_values('Recall@K Mean', ascending = False)
 
@@ -1170,24 +1379,24 @@ final_result.sort_values('Recall@K Mean', ascending = False)
 # ## Final Model
 # **The best parameters are the standard used by the Classifier**
 
-# In[247]:
+# In[218]:
 
 
 #define model
-catboost_tuned = CatBoostClassifier(verbose = False, random_state = 22)
+lgbm_tuned = LGBMClassifier(random_state = 22)
 
 #train model
-catboost_tuned = catboost_tuned.fit( x_train, y_train)
+lgbm_tuned = lgbm_tuned.fit( x_train, y_train)
 
 #model prediction
-yhat_catboost_tuned = catboost_tuned.predict_proba( x_val)
+yhat_lgbm_tuned = lgbm_tuned.predict_proba( x_val)
 
 
-# In[248]:
+# In[219]:
 
 
-accuracy_catboost_tuned = cross_validation(catboost_tuned, x_train, y_train, 5, df6, Verbose = False)
-accuracy_catboost_tuned
+accuracy_lgbm_tuned = cross_validation(lgbm_tuned, x_train, y_train, 5, df6, Verbose = False)
+accuracy_lgbm_tuned
 
 
 # # Performance Evaluation and Interpretation
@@ -1202,13 +1411,13 @@ accuracy_catboost_tuned
 
 # ## What percentage of interested customers the sales team will be able to contact making 20.000 calls?
 
-# In[284]:
+# In[220]:
 
 
 # Define dataset to apply final model
 df9 = x_val.copy()
 df9['response'] = y_val.copy()
-df9['score'] = yhat_catboost_tuned[:, 1].tolist()
+df9['score'] = yhat_lgbm_tuned[:, 1].tolist()
 df9 = df9.sort_values('score', ascending=False)
 
 # Define dataset percentage that defines 20.000 calls
@@ -1219,22 +1428,22 @@ recall_at_20000 = round((recall_at_k(df9))*100 , 2 )
 print(f'Using {percent}% of the test data, the model could find {recall_at_20000}% of the total customers interested in purchase a car insurance.')
 
 
-# In[293]:
+# In[222]:
 
 
 fig, ax = plt.subplots(figsize = (25, 10))
 
 plt.subplot(1, 2, 1)
-plot_cumulative_gain(y_val, yhat_catboost_tuned[:,1])
+plot_cumulative_gain(y_val, yhat_lgbm_tuned[:,1])
 plt.axvline(2.624, color ='#FF7F0E', ls = '--')
 plt.title('Cumulative Gain Final Model - 20.000 calls')
 plt.yticks(np.arange(0, 100, step = 10))
 plt.xticks(np.arange(0, 10.5, step = 0.5))
-plt.legend(['Final Model - Catboost Classifier', 'Wizard', 'Random', 'Test Percentage'])
+plt.legend(['Final Model - LGBM Classifier', 'Wizard', 'Random', 'Test Percentage'])
 
 bbox = dict(boxstyle ='round', fc ='0.7')
 arrowprops = dict(facecolor ='#4D4D4D')
-plt.annotate('Final Model: 69.37%', xy = (2.624, 69.37),
+plt.annotate('Final Model: 69.24%', xy = (2.624, 69.37),
                 xytext =(3, 67), 
                 arrowprops = arrowprops, bbox = bbox)
 
@@ -1245,17 +1454,17 @@ plt.annotate('Random: ~26%', xy = (2.624, 26.24),
 
 
 plt.subplot(1, 2, 2)
-plot_lift(y_val, yhat_catboost_tuned[:,1])
+plot_lift(y_val, yhat_lgbm_tuned[:,1])
 plt.axvline(2.624, color ='#FF7F0E', ls = '--')
 plt.title('Lift Curve - 20.000 calls')
 plt.yticks(np.arange(0, 3, step = 0.2))
 plt.xticks(np.arange(0, 10.5, step = 0.5))
-plt.legend(['Final Model - Catboost Classifier', 'Random', 'Test Percentage']);
+plt.legend(['Final Model - LGBM Classifier', 'Random', 'Test Percentage']);
 
 
 # ## By increasing the capacity to 40,000 calls, what percentage of interested customers the sales team will be able to contact?
 
-# In[295]:
+# In[223]:
 
 
 # Define dataset percentage that defines 40.000 calls
@@ -1266,21 +1475,21 @@ recall_at_40000 = round((recall_at_k(df9, 40000))*100 , 2 )
 print(f'Using {percent}% of the test data, the model could find {recall_at_40000}% of the total customers interested in purchase a car insurance.')
 
 
-# In[312]:
+# In[224]:
 
 
 fig, ax = plt.subplots(figsize = (25, 10))
 
 plt.subplot(1, 2, 1)
-plot_cumulative_gain(y_val, yhat_catboost_tuned[:,1])
+plot_cumulative_gain(y_val, yhat_lgbm_tuned[:,1])
 plt.axvline(5.248, color ='#FF7F0E', ls = '--')
 plt.title('Cumulative Gain Final Model - 40.000 calls')
 plt.yticks(np.arange(0, 100, step = 10))
 plt.xticks(np.arange(0, 10.5, step = 0.5))
-plt.legend(['Final Model - Catboost Classifier', 'Wizard', 'Random', 'Test Percentage'])
+plt.legend(['Final Model - LGBM Classifier', 'Wizard', 'Random', 'Test Percentage'])
 
 arrowprops = dict(facecolor ='#4D4D4D')
-plt.annotate('Final Model: 98.67%', xy = (5.248, 98.67),
+plt.annotate('Final Model: 98.67%', xy = (5.248, 98.64),
                 xytext =(5.7, 94), 
                 arrowprops = arrowprops, bbox = bbox)
 
@@ -1291,10 +1500,10 @@ plt.annotate('Random: ~52%', xy = (5.248, 52.48),
 
 
 plt.subplot(1, 2, 2)
-plot_lift(y_val, yhat_catboost_tuned[:,1])
+plot_lift(y_val, yhat_lgbm_tuned[:,1])
 plt.axvline(5.248, color ='#FF7F0E', ls = '--')
 plt.title('Lift Curve - 40.000 calls')
 plt.yticks(np.arange(0, 3, step = 0.2))
 plt.xticks(np.arange(0, 10.5, step = 0.5))
-plt.legend(['Final Model - Catboost Classifier', 'Random', 'Test Percentage']);
+plt.legend(['Final Model - LGBM Classifier', 'Random', 'Test Percentage']);
 
