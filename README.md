@@ -149,7 +149,7 @@ Performance plots show the model's ability to identify **all customers intereste
 
 ### Insight 2. Vehicles Age
 
-> Interest is greater on customers' with vehicles age between 1 and 2 years old.
+> Interest is greater on customers' with vehicles age over 2 years old.
 
 ![Insight2](https://user-images.githubusercontent.com/68538809/147420148-6b78b6fa-43c1-4d33-83db-b8b7da0a8f61.JPG)
 
