@@ -135,11 +135,11 @@ The indicator "Recall at K" was the one to assume the major importance as it rep
 The following table discloses the cross-validated ("real") performance of all the models used.
 **"LGBM Classifier"** holds the best Recall at k result, making it the one to be used.
 
-![CVResults](https://user-images.githubusercontent.com/68538809/147598382-5a6bbf2b-4d55-49cb-a6e6-10affb229e17.JPG)
+![CVResults](https://user-images.githubusercontent.com/68538809/147599534-6757fe6e-e862-4f8f-9827-3d4f27f06d9b.JPG)
 
 Performance plots show the model's ability to identify **all customers interested** in purchasing the product using approximately **50% of the sample** (Cumulative Gain Curve). It is also possible to see that the model is initially **more than 3 times better than a random selection** (Lift Curve). It is important to notice that even after reaching half the sample, the model remains to perform 2 times better than a random method. 
 
-![PerformancePlots](https://user-images.githubusercontent.com/68538809/147598386-445b3403-a23f-482e-be63-4889df7bd1ea.png)
+![PerformancePlots](https://user-images.githubusercontent.com/68538809/147599532-9a6bb7ed-e3c5-4083-b03e-a219f68a2de7.png)
 
 # 6. Business Results
 
