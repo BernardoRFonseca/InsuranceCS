@@ -169,13 +169,13 @@ Performance plots show the model's ability to identify **all customers intereste
 
 ![Insight4](https://user-images.githubusercontent.com/68538809/147420570-b0968368-2b2d-4675-a919-76b825099d99.JPG)
 
-## **2.** How many interest custumers will the sales team be able to reach with 20,000 phone calls.
+## **2.** How many interest customers will the sales team be able to reach with 20,000 phone calls.
 
 > With 20,000 calls, the sales team will be able to **reach 45.44%** of the interested customers. This is more 2,829 customers when compared to a random model, representing an increase of 2,546,100€ in revenue.
 
 ![Plot20000](https://user-images.githubusercontent.com/68538809/147598392-9bb55d9a-74f1-4fd1-b8ef-e568ef75a222.JPG)
 
-## **3.** How many interested custumers would the sales team be able to reach if the budget was increased to 40,000 calls.
+## **3.** How many interested customers would the sales team be able to reach if the budget was increased to 40,000 calls.
 
 With 40,000 calls, the sales team will be able to **reach 78.84%** of the interested customers. This is more 4,510 customers when compared to a random model, representing an increase of 4,059,000€ in revenue.
 
