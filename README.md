@@ -183,5 +183,17 @@ With 40,000 calls, the sales team will be able to **reach 78.84%** of the intere
 
 # 7. Conclusions
 
+Learn to rank models is a special classification task. Businesswise, I have created a ranking list capable of identifying potential customers, this is a major help in terms of managing workflows and guiding the business towards revenue generation and costs reduction. 
+The project has demonstrated that using a Machine Learning model is more effective than random sorting.
+
+The sales team will need to call ≈60% of the customers to reach 100% of interested parties. With random sorting, this rate would only be achieved by calling all customers. This concludes that by using data science techniques, the company is able to save approximately 40% in customer contact costs.
+
 # 8. Next Steps to Improve
 
+1. Search for **new features** to improve the final result;
+
+2. **Balance** the response variable to test the results;
+
+3. Improve **fine-tuning** parameters;
+
+4. Implement deployment strategy.

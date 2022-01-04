@@ -3,7 +3,7 @@
 
 # # 0 Imports
 
-# In[1]:
+# In[180]:
 
 
 import pandas                 as pd
@@ -13,6 +13,7 @@ import matplotlib.pyplot      as plt
 import scikitplot             as skplt
 import sklearn
 import inflection
+import pickle
 
 from sklearn.preprocessing    import MinMaxScaler, StandardScaler
 from sklearn                  import model_selection
@@ -783,7 +784,7 @@ sns.heatmap(corr_matrix, mask = mask, annot = True, square = True, cmap='YlGnBu'
 
 # # 4 Data Preparation
 
-# In[55]:
+# In[189]:
 
 
 df4 = df3.copy()
@@ -791,40 +792,54 @@ df4 = df3.copy()
 
 # ## 4.1 Standardization of DataSets 
 
-# In[56]:
+# In[190]:
 
 
-df4['annual_premium'] = StandardScaler().fit_transform( df4[['annual_premium']].values)
+ss_annual_premium = StandardScaler()
+
+#annual_premium
+df4['annual_premium'] = ss_annual_premium.fit_transform( df4[['annual_premium']].values)
+#save to pickle
+pickle.dump(ss_annual_premium, open( '/Users/User/repos/InsuranceCS/parameter/annual_premium_scaler.pkl', 'wb'))
 
 
 # ## 4.2 Rescaling
 
-# In[57]:
+# In[191]:
 
 
-mms = MinMaxScaler()
+mms_age = MinMaxScaler()
+mms_vintage = MinMaxScaler()
 
 #age
-df4['age'] = mms.fit_transform( df4[['age']].values)
+df4['age'] = mms_age.fit_transform( df4[['age']].values)
+#save to pickle
+pickle.dump(mms_age, open( '/Users/User/repos/InsuranceCS/webapp/parameter/age_scaler.pkl', 'wb'))
 
 #vintage
-df4['vintage'] = mms.fit_transform( df4[['vintage']].values)
+df4['vintage'] = mms_vintage.fit_transform( df4[['vintage']].values)
+#save to pickle
+pickle.dump(mms_vintage, open( '/Users/User/repos/InsuranceCS/webapp/parameter/vintage_scaler.pkl', 'wb'))
 
 
 # ## 4.3 Transformation
 
 # ### 4.3.1 Encoding
 
-# In[58]:
+# In[192]:
 
 
 #gender - target encoder
 target_encode_gender = df4.groupby('gender')['response'].mean()
 df4.loc[:, 'gender'] = df4['gender'].map(target_encode_gender)
+#save to pickle
+pickle.dump(target_encode_gender, open( '/Users/User/repos/InsuranceCS/webapp/parameter/target_encode_gender_scaler.pkl', 'wb'))
 
 # region_code - Target Encoding - as there are plenty of categories (as seen in EDA) it is better not to use one hot encoding and to use 
 target_encode_region_code = df4.groupby('region_code')['response'].mean()
 df4.loc[:, 'region_code'] = df4['region_code'].map(target_encode_region_code)
+#save to pickle
+pickle.dump(target_encode_region_code, open( '/Users/User/repos/InsuranceCS/webapp/parameter/target_encode_region_code_scaler.pkl', 'wb'))
 
 #vehicle_age
 df4 = pd.get_dummies( df4, prefix='vehicle_age', columns=['vehicle_age'] )
@@ -832,6 +847,8 @@ df4 = pd.get_dummies( df4, prefix='vehicle_age', columns=['vehicle_age'] )
 #policy_sales_channel - Frequency encode
 fe_policy_sales_channel = df4.groupby('policy_sales_channel').size()/len( df4)
 df4['policy_sales_channel'] = df4['policy_sales_channel'].map(fe_policy_sales_channel)
+#save to pickle
+pickle.dump(fe_policy_sales_channel, open( '/Users/User/repos/InsuranceCS/webapp/parameter/fe_policy_sales_channel_scaler.pkl', 'wb'))
 
 
 # # 5 Feature Selection
@@ -1398,6 +1415,9 @@ lgbm_tuned = LGBMClassifier(random_state = 22)
 #train model
 lgbm_tuned = lgbm_tuned.fit( x_train, y_train)
 
+#save model to pickle
+pickle.dump(lgbm_tuned, open( '/Users/User/repos/InsuranceCS/webapp/model/model_lgbm.pkl', 'wb'))
+
 #model prediction
 yhat_lgbm_tuned = lgbm_tuned.predict_proba( x_val)
 
@@ -1453,13 +1473,13 @@ df_prod['vehicle_damage'] = df_prod['vehicle_damage'].apply( lambda x: 1 if x ==
 
 ##Standardization
 #annual_premium
-df_prod['annual_premium'] = StandardScaler().fit_transform( df_prod[['annual_premium']].values)
+df_prod['annual_premium'] = ss_annual_premium.fit_transform( df_prod[['annual_premium']].values)
 
 ##Rescaling
 #age
-df_prod['age'] = mms.fit_transform( df_prod[['age']].values)
+df_prod['age'] = mms_age.fit_transform( df_prod[['age']].values)
 #vintage
-df_prod['vintage'] = mms.fit_transform( df_prod[['vintage']].values)
+df_prod['vintage'] = mms_vintage.fit_transform( df_prod[['vintage']].values)
 
 ##Transformation
 #gender - target encoder
@@ -1561,12 +1581,12 @@ sns.countplot(aux9122['response'], ax=axs[1]).set_title('Vehicle Age Between 1-2
 sns.countplot(aux9123['response'], ax=axs[2]).set_title('Vehicle Age > 2 Years');
 
 
-# In[121]:
+# In[176]:
 
 
 print('% Interested in vehicle insurance for customers with cars age under 1 year: {0:.2f}'.format(100*(aux9121[aux9121['response']==1]['response'].count()/(aux9121[aux9121['response']==1]['response'].count()+aux9121[aux9121['response']==0]['response'].count()))))
 print('% Interested in vehicle insurance for customers with cars age between 1 and 2 years: {0:.2f}'.format(100*(aux9122[aux9122['response']==1]['response'].count()/(aux9122[aux9122['response']==1]['response'].count()+aux9122[aux9122['response']==0]['response'].count()))))
-print('% Interested in vehicle insurance for customers with cars age over 2 years: {0:.2f}'.format(100*(aux253[aux9123['response']==1]['response'].count()/(aux9123[aux9123['response']==1]['response'].count()+aux9123[aux9123['response']==0]['response'].count()))))
+print('% Interested in vehicle insurance for customers with cars age over 2 years: {0:.2f}'.format(100*(aux9123[aux9123['response']==1]['response'].count()/(aux9123[aux9123['response']==1]['response'].count()+aux9123[aux9123['response']==0]['response'].count()))))
 
 
 # ### 9.1.3 Insight #3:
@@ -1595,23 +1615,23 @@ aux913
 # ### 9.1.4 Insight #4:
 # **Findings** Customers with higher health insurance annual Premiums are more interested in getting a vehicle insurance.
 
-# In[124]:
+# In[178]:
 
 
 aux9141 = df3[df3['annual_premium']>30000][['id','response']]
 aux9142 = df3[df3['annual_premium']<=30000][['id','response']]
 
 fig, axs = plt.subplots(ncols= 2, figsize = (20,8))
-aux9141 = sns.countplot(aux9141['response'], ax=axs[0])
-aux9141.set_title('Annual_premium > 30k')
-aux9141.set_xticklabels(['Not Interested', 'Interested'])
+aux91411 = sns.countplot(aux9141['response'], ax=axs[0])
+aux91411.set_title('Annual_premium > 30k')
+aux91411.set_xticklabels(['Not Interested', 'Interested'])
 
-aux9142 = sns.countplot(aux9142['response'], ax=axs[1])
-aux9142.set_title('Annual_premium < 30k')
-aux9142.set_xticklabels(['Not Interested', 'Interested']);
+aux91421 = sns.countplot(aux9142['response'], ax=axs[1])
+aux91411.set_title('Annual_premium < 30k')
+aux91421.set_xticklabels(['Not Interested', 'Interested']);
 
 
-# In[125]:
+# In[179]:
 
 
 print('% Interested in vehicle insurance for customers with health insurance premium under 30k/year: {0:.2f}'.format(100*(aux9142[aux9142['response']==1]['response'].count()/(aux9142[aux9142['response']==1]['response'].count()+aux9142[aux9142['response']==0]['response'].count()))))
@@ -1657,7 +1677,7 @@ interested_baseline20k = int(round(((len(interested)*percent))/100,0))
 interested_lgbm20k = int(round(((len(interested)*recall_at_20000))/100,0))
 
 
-# In[154]:
+# In[169]:
 
 
 fig, ax = plt.subplots(figsize = (25, 10))
@@ -1681,7 +1701,7 @@ plt.annotate('Final Model: 45.44%', xy = (1.58, 45.6),
                 arrowprops = arrowprops, bbox = bbox)
 
 plt.annotate('Random: ~15.7%', xy = (1.58, 15.9),
-                xytext =(2.7, 22), 
+                xytext =(2.2, 18), 
                 arrowprops = arrowprops, bbox = bbox)
 
 plt.subplot(1, 2, 2)
